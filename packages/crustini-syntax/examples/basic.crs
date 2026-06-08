@@ -1,0 +1,88 @@
+app! {
+  name: "TinyMenu"
+
+  target: esp32_s3
+
+  display: st7789 {
+    width: 240
+    height: 135
+    color: rgb565
+    rotation: landscape
+  }
+
+  input {
+    button up
+    button down
+    button ok
+  }
+
+  state {
+    selected: u8 = 0
+    battery: u8 = 82
+    wifi: bool = true
+  }
+
+  every 1000ms {
+    battery = sensor.battery_percent()
+    redraw()
+  }
+
+  screen Main {
+    const items = ["Run", "WiFi", "Info"]
+
+    draw {
+      clear(BLACK)
+
+      text(8, 8, "CRUSTINI", color: WHITE, font: bold_12)
+      line(8, 24, 232, 24, color: GRAY)
+
+      menu(
+        x: 8,
+        y: 38,
+        w: 224,
+        items: items,
+        selected: selected
+      )
+
+      progress(
+        x: 8,
+        y: 116,
+        w: 224,
+        h: 8,
+        value: battery,
+        max: 100,
+        color: GREEN
+      )
+    }
+
+    on button.up {
+      selected = selected.saturating_sub(1)
+      redraw()
+    }
+
+    on button.down {
+      selected = min(selected + 1, 2)
+      redraw()
+    }
+
+    on button.ok {
+      match selected {
+        0 => goto Run
+        1 => goto Wifi
+        2 => goto Info
+      }
+    }
+  }
+
+  screen Run {
+    draw {
+      clear(BLACK)
+      text(8, 8, "Running...", color: GREEN)
+      text(8, 116, "OK = back", color: GRAY)
+    }
+
+    on button.ok {
+      goto Main
+    }
+  }
+}

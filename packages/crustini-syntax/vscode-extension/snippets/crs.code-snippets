@@ -1,0 +1,42 @@
+{
+  "app": {
+    "prefix": "app",
+    "body": [
+      "app! {",
+      "  name: \"$1\"",
+      "",
+      "  target: esp32_s3",
+      "",
+      "  display: st7789 {",
+      "    width: 240",
+      "    height: 135",
+      "    color: rgb565",
+      "  }",
+      "",
+      "  state {",
+      "    selected: u8 = 0",
+      "  }",
+      "",
+      "  screen Main {",
+      "    draw {",
+      "      clear(BLACK)",
+      "      text(8, 8, \"$2\", color: WHITE)",
+      "    }",
+      "  }",
+      "}"
+    ],
+    "description": "Crustini app root"
+  },
+  "screen": {
+    "prefix": "screen",
+    "body": [
+      "screen ${1:Main} {",
+      "  draw {",
+      "    clear(BLACK)",
+      "    text(8, 8, \"$2\", color: WHITE)",
+      "  }",
+      "}"
+    ],
+    "description": "Crustini screen"
+  }
+}

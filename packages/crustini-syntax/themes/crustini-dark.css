@@ -1,0 +1,79 @@
+:root {
+  --crs-bg: #0d0d12;
+  --crs-panel: #15151d;
+  --crs-border: #2b2b38;
+  --crs-text: #e8e8f0;
+  --crs-muted: #77778c;
+  --crs-line: #555568;
+  --crs-keyword: #ff6b9d;
+  --crs-declaration: #9b8cff;
+  --crs-macro: #ffc857;
+  --crs-type: #59d6ff;
+  --crs-string: #a8ff9e;
+  --crs-number: #ffb86b;
+  --crs-comment: #66667a;
+  --crs-builtin: #7ee7d6;
+  --crs-property: #c6a7ff;
+  --crs-constant: #ffda7a;
+  --crs-punctuation: #a6a6ba;
+  --crs-operator: #ff8fab;
+}
+
+.crs-code {
+  margin: 0;
+  overflow: auto;
+  background: var(--crs-bg);
+  border: 1px solid var(--crs-border);
+  border-radius: 12px;
+  color: var(--crs-text);
+  font-family:
+    "SFMono-Regular",
+    "Cascadia Code",
+    "JetBrains Mono",
+    "Fira Code",
+    "Menlo",
+    "Consolas",
+    monospace;
+  font-size: 13.5px;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.crs-code code {
+  display: block;
+  padding: 14px 0;
+  white-space: pre;
+}
+
+.crs-line {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  min-height: 1.55em;
+  padding-right: 16px;
+}
+
+.crs-line-number {
+  user-select: none;
+  color: var(--crs-line);
+  text-align: right;
+  padding-right: 12px;
+  border-right: 1px solid rgba(85, 85, 104, 0.35);
+  margin-right: 14px;
+}
+
+.crs-line-source {
+  min-width: 0;
+}
+
+.crs-comment { color: var(--crs-comment); font-style: italic; }
+.crs-string { color: var(--crs-string); }
+.crs-number { color: var(--crs-number); }
+.crs-macro { color: var(--crs-macro); font-weight: 750; }
+.crs-keyword { color: var(--crs-keyword); font-weight: 650; }
+.crs-declaration { color: var(--crs-declaration); font-weight: 650; }
+.crs-type { color: var(--crs-type); }
+.crs-constant { color: var(--crs-constant); }
+.crs-builtin { color: var(--crs-builtin); }
+.crs-property { color: var(--crs-property); }
+.crs-punctuation { color: var(--crs-punctuation); }
+.crs-operator { color: var(--crs-operator); }
