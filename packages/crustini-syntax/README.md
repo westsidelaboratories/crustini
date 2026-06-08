@@ -1,6 +1,8 @@
 # `@crustini/syntax`
 
-Permanent syntax highlighting kit for Crustini `.crs` files.
+Permanent syntax highlighting kit for Crustini source files.
+
+Crustini product vocabulary is moving toward `.flour` for user-authored source. This package still has `.crs` names in tokenizer classes, TextMate scopes, and examples because those are current implementation names. Treat `.crs` as transitional syntax-package naming and `.flour` as the direction for editor/file-extension UX.
 
 This is intentionally small and dependency-light. It gives you the same visual language in every place you care about:
 
@@ -97,6 +99,8 @@ as the Crustini grammar with scope:
 source.crs
 ```
 
+When the `.flour` migration reaches syntax tooling, add `source.flour` while keeping `source.crs` as a compatibility alias for existing integrations.
+
 ## Syntax classes
 
 The standalone HTML highlighter emits:
@@ -133,4 +137,4 @@ syntax highlighter = fast lexical tokenizer
 compiler/parser    = real semantic parser
 ```
 
-Later, once the `.crs` grammar hardens, replace the CodeMirror stream mode with a real Lezer grammar.
+Later, once the `.flour` grammar hardens, replace the CodeMirror stream mode with a real Lezer grammar and keep compatibility aliases for existing `.crs` integrations.

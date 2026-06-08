@@ -1,0 +1,57 @@
+1. Let Rust keep the real borrow checker.
+2. Do not expose Rust borrowing to Crustini users.
+3. Compile every program into one App struct.
+4. Store dynamic objects in fixed pools.
+5. Use handles instead of references.
+6. Use frame scratch memory instead of GC.
+7. Make update() mutable and draw() mostly read-only.
+8. For pool mutation, use scoped with-blocks.
+9. For deletion, mark dead and sweep after iteration.
+10. Add desktop heap/managed mode later, not first.
+
+No malloc.
+No free.
+No GC.
+No lifetimes.
+
+You own app state.
+You spawn things into pools.
+You get handles back.
+Temporary stuff dies every frame.
+Rust checks the generated code.
+
+That is the easiest version that is still genuinely useful.
+
+Vocabulary we are going with:
+
+.flour source code
+bake   compile/build
+oven   build cache/runtime target dir
+loaf   final binary/artifact
+crumbs diagnostics/logs
+starter project template
+
+Use the themed terms in user-facing docs, site copy, examples,
+CLI planning, and agent notes.
+
+Keep technical precision beside the themed word:
+
+- .flour is the user-authored Crustini source file.
+- bake is the action that parses, validates, emits Rust, and runs the backend build.
+- oven is the generated workspace/cache/runtime target directory.
+- loaf is the final artifact a user can run, flash, ship, or inspect.
+- crumbs are diagnostics, logs, warnings, source spans, backend output, and build metadata.
+- starter is a scaffolded project that can bake immediately.
+
+Current repo names:
+
+- .flour is accepted as the source suffix.
+- .crst examples still work as compatibility fixtures.
+- .oven/ is the generated oven directory.
+- crustini bake is the current bake command.
+- crustini build still works as a compatibility alias.
+- crustini starter counter <dir> creates the first tiny starter.
+
+Do not expose Rust borrowing to users.
+Do not make users reason about generated crates first.
+The user edits flour, bakes it, checks crumbs, and gets a loaf.

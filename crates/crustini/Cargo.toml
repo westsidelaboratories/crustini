@@ -1,0 +1,13 @@
+[package]
+name = "crustini"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "crustini"
+path = "src/lib.rs"
+
+[[bin]]
+name = "crustini"
+path = "src/main.rs"

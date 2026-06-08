@@ -1,0 +1,26 @@
+{
+  "name": "crustini-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "editors/vscode"
+  ],
+  "scripts": {
+    "build": "bun run build:rust && bun run build:site",
+    "build:rust": "cargo build --workspace",
+    "build:site": "bun --filter @crustini/site build",
+    "check": "bun run check:rust && bun run check:examples && bun run check:site",
+    "check:examples": "cargo run -p crustini -- build examples/bounce/app.crst && cargo run -p crustini -- build examples/counter/app.crst",
+    "check:rust": "cargo check --workspace",
+    "check:site": "bun --filter @crustini/site check",
+    "site:dev": "bun --filter @crustini/site dev",
+    "site:preview": "bun --filter @crustini/site preview"
+  },
+  "devDependencies": {
+    "astro": "^6.4.4",
+    "typescript": "^6.0.3"
+  }
+}

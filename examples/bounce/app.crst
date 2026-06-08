@@ -1,0 +1,31 @@
+app! {
+  screen 240 135
+  fps 30
+
+  state {
+    x: i16 = 120
+    y: i16 = 67
+    vx: i16 = 1
+  }
+
+  setup {
+    clear 0
+  }
+
+  update {
+    x = x + vx
+
+    if x > 232 {
+      vx = -1
+    }
+
+    if x < 8 {
+      vx = 1
+    }
+  }
+
+  draw {
+    clear 12
+    circle x y 8 255
+  }
+}

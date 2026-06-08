@@ -1,0 +1,26 @@
+app! {
+  screen 240 135
+  fps 30
+
+  state {
+    ticks: u32 = 0
+    x: i16 = 10
+  }
+
+  update {
+    ticks = ticks + 1
+
+    if right {
+      x = x + 1
+    }
+
+    if left {
+      x = x - 1
+    }
+  }
+
+  draw {
+    clear 0
+    rect x 20 20 20 200
+  }
+}

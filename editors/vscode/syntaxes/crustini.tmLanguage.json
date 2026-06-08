@@ -1,0 +1,33 @@
+{
+  "scopeName": "source.crustini",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash.crustini",
+      "match": "//.*$"
+    },
+    {
+      "name": "keyword.control.crustini",
+      "match": "\\b(if|else|while|for|return|break|continue)\\b"
+    },
+    {
+      "name": "keyword.declaration.crustini",
+      "match": "\\b(app|state|setup|update|draw|screen|fps)\\b|app!"
+    },
+    {
+      "name": "storage.type.crustini",
+      "match": "\\b(i8|i16|i32|i64|isize|u8|u16|u32|u64|usize|bool)\\b"
+    },
+    {
+      "name": "constant.language.boolean.crustini",
+      "match": "\\b(true|false)\\b"
+    },
+    {
+      "name": "constant.numeric.crustini",
+      "match": "\\b[0-9]+\\b"
+    },
+    {
+      "name": "entity.name.function.crustini",
+      "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s|\\()"
+    }
+  ]
+}

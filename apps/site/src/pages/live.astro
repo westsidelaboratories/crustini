@@ -1,0 +1,36 @@
+---
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crustini Docs Live</title>
+    <link rel="stylesheet" href="/live/style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Crustini Docs Live</h1>
+        <p>Write Markdown-ish docs with <code>```crs</code> code blocks. Preview updates live.</p>
+      </div>
+      <button id="copyHtml">Copy preview HTML</button>
+    </header>
+
+    <main>
+      <section class="pane">
+        <div class="bar">docs.md</div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </section>
+
+      <section class="pane">
+        <div class="bar">preview</div>
+        <article id="preview" class="docs"></article>
+      </section>
+    </main>
+
+    <script is:inline src="/live/crs-highlight.js"></script>
+    <script is:inline src="/live/docs-live.js"></script>
+  </body>
+</html>

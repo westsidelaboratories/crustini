@@ -1,0 +1,28 @@
+{
+  "name": "crustini-syntax",
+  "displayName": "Crustini Syntax",
+  "description": "Tiny syntax highlighting for Crustini .crst files.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "crustini",
+        "aliases": ["Crustini", "crustini"],
+        "extensions": [".crst"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "crustini",
+        "scopeName": "source.crustini",
+        "path": "./syntaxes/crustini.tmLanguage.json"
+      }
+    ]
+  }
+}

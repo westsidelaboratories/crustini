@@ -1,0 +1,201 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #09090d;
+  --panel: #111119;
+  --panel-2: #171722;
+  --border: #303044;
+  --text: #ededf6;
+  --muted: #9696aa;
+
+  --crs-bg: #0d0d12;
+  --crs-text: #e8e8f0;
+  --crs-line: #555568;
+  --crs-keyword: #ff6b9d;
+  --crs-declaration: #9b8cff;
+  --crs-macro: #ffc857;
+  --crs-type: #59d6ff;
+  --crs-string: #a8ff9e;
+  --crs-number: #ffb86b;
+  --crs-comment: #66667a;
+  --crs-builtin: #7ee7d6;
+  --crs-property: #c6a7ff;
+  --crs-constant: #ffda7a;
+  --crs-punctuation: #a6a6ba;
+  --crs-operator: #ff8fab;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+header {
+  height: 74px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #0d0d13;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - 74px);
+}
+
+.pane {
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+}
+
+.pane:last-child {
+  border-right: 0;
+}
+
+.bar {
+  height: 34px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--panel-2);
+}
+
+textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: #0d0d13;
+  color: var(--text);
+  padding: 16px;
+  font: 13.5px/1.55 "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  tab-size: 2;
+}
+
+.docs {
+  flex: 1;
+  overflow: auto;
+  padding: 22px;
+  line-height: 1.55;
+}
+
+.docs h1,
+.docs h2,
+.docs h3 {
+  margin: 1.2em 0 0.4em;
+  line-height: 1.15;
+}
+
+.docs h1:first-child,
+.docs h2:first-child,
+.docs h3:first-child {
+  margin-top: 0;
+}
+
+.docs p {
+  color: var(--text);
+  font-size: 15px;
+  max-width: 72ch;
+}
+
+.docs code:not(.language-crs) {
+  background: #222232;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: #ffd98a;
+}
+
+.crs-code {
+  margin: 14px 0;
+  overflow: auto;
+  background: var(--crs-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--crs-text);
+  font: 13.5px/1.55 "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  tab-size: 2;
+}
+
+.crs-code code {
+  display: block;
+  padding: 14px 0;
+  white-space: pre;
+}
+
+.crs-line {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  min-height: 1.55em;
+  padding-right: 16px;
+}
+
+.crs-line-number {
+  user-select: none;
+  color: var(--crs-line);
+  text-align: right;
+  padding-right: 12px;
+  border-right: 1px solid rgba(85, 85, 104, 0.35);
+  margin-right: 14px;
+}
+
+.crs-comment { color: var(--crs-comment); font-style: italic; }
+.crs-string { color: var(--crs-string); }
+.crs-number { color: var(--crs-number); }
+.crs-macro { color: var(--crs-macro); font-weight: 750; }
+.crs-keyword { color: var(--crs-keyword); font-weight: 650; }
+.crs-declaration { color: var(--crs-declaration); font-weight: 650; }
+.crs-type { color: var(--crs-type); }
+.crs-constant { color: var(--crs-constant); }
+.crs-builtin { color: var(--crs-builtin); }
+.crs-property { color: var(--crs-property); }
+.crs-punctuation { color: var(--crs-punctuation); }
+.crs-operator { color: var(--crs-operator); }
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  .pane {
+    height: 50vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
