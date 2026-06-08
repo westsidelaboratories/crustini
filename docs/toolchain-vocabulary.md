@@ -1,323 +1,176 @@
-# Crustini Toolchain Vocabulary
+# Crustini Naming Guide
 
-This document is the working source of truth for the Crustini product language and build lifecycle. It defines the terms we will use in docs, UI, examples, CLI planning, and agent notes.
+This is the working naming guide for Crustini docs, CLI output, examples, and agent notes.
 
-The short version:
+Keep the vocabulary small:
 
 ```txt
-.flour source
-  -> bake
-  -> oven
-  -> loaf
-
-crumbs explain what happened along the way
-starter creates a new source tree
+.flour  source file
+rx      command
+recipe project config
+bake    compile/build action
+bakery  generated build workspace/cache
+starter project template
 ```
 
-## Vocabulary
+Use plain technical words for everything else: artifact, diagnostics, logs, generated Rust, runtime, target, cache, manifest.
 
-### `.flour`
+## `rx`
 
-`.flour` is the Crustini source file extension and the name for user-authored source code.
+`rx` is the Crustini command.
 
-A `.flour` file should be small, direct, and designed for app logic on constrained targets. It describes app state, setup, update logic, drawing, input handling, display configuration, and later pools/resources. It is not Rust with lighter syntax. It is the user-facing Crustini language that compiles into generated Rust.
+The default command previews a `.flour` app:
 
-Use `.flour` when talking about:
-
-- source files written by users
-- language examples
-- editor modes
-- syntax highlighting
-- starters and templates
-- source-level diagnostics
-
-Current transition note: the compiler accepts `.flour` source and keeps `.crst` compatibility for existing examples. Some syntax package assets still use `.crs` naming. New documentation should describe `.flour` as the source extension and call out `.crst`/`.crs` only when exact existing paths require it.
-
-Example:
-
-```crustini
-app! {
-  screen 240 135
-  fps 30
-
-  state {
-    x: i16 = 120
-    y: i16 = 67
-    vx: i16 = 1
-  }
-
-  update {
-    x = x + vx
-
-    if x > 232 {
-      vx = -1
-    }
-
-    if x < 8 {
-      vx = 1
-    }
-  }
-
-  draw {
-    clear 12
-    circle x y 8 255
-  }
-}
+```bash
+rx app.flour
 ```
+
+Use explicit verbs when you want a specific phase:
+
+```bash
+rx run app.flour
+rx proof app.flour
+rx bake app.flour
+rx emit app.flour
+rx starter hello my-hello
+rx starters
+```
+
+## `recipe.flour`
+
+`recipe.flour` is the Crustini project config file.
+
+Single-file apps can still be run directly:
+
+```bash
+rx app.flour
+```
+
+Project-shaped apps use:
+
+```txt
+my-app/
+  recipe.flour
+  src/main.flour
+  assets/
+```
+
+Project output is generated under `.crustini/generated/` by default.
+
+## `.flour`
+
+`.flour` is the Crustini source file extension.
+
+A `.flour` file is user-authored app source. It describes state, setup, update logic, drawing, input, display configuration, and later resource pools. It is not Rust with lighter syntax; it is the small Crustini language that emits generated Rust.
+
+Current compatibility note: `.crst` remains accepted as an old source extension, but repo examples and new docs should use `.flour`. Some syntax package internals still use `.crs` naming while editor tooling catches up.
 
 ## `bake`
 
-`bake` is the compile/build action. It is the verb for turning `.flour` source into generated Rust, building that Rust, and producing a final artifact.
-
-The intended mental model:
-
-```txt
-bake app.flour
-```
-
-Under the hood, a bake has phases:
-
-1. Read `.flour` source.
-2. Parse the app structure.
-3. Validate language-level rules.
-4. Emit generated Rust.
-5. Write or update the oven.
-6. Invoke the platform build backend when requested.
-7. Produce a loaf.
-8. Write crumbs for diagnostics, warnings, and build metadata.
-
-The CLI exposes this as:
+`bake` is the compile/build command.
 
 ```bash
-cargo run -p crustini -- bake examples/bounce/app.crst
+rx bake app.flour
 ```
 
-`build` remains as a compatibility alias, but docs and UX should prefer `bake`.
+In this repo during development:
 
-## `oven`
+```bash
+cargo run --bin rx -- bake examples/bounce/app.flour
+```
 
-`oven` is the build workspace and runtime target directory. It is where Crustini stores generated code, generated manifests, build cache data, intermediate files, target-specific configuration, and anything needed to turn source into an artifact.
+A bake currently:
 
-The oven is not the final shipped app. It is the controlled intermediate environment where source is transformed and compiled.
+1. Reads source.
+2. Parses the app with a small macro-shaped parser.
+3. Emits a generated `#![no_std]` Rust crate.
+4. Writes that crate into `.bakery/`.
+5. Runs Cargo unless `--no-cargo` is passed.
+6. Prints the generated artifact path.
 
-An oven can contain:
+`build` remains a compatibility alias for `bake`.
 
-- generated Rust source
-- generated `Cargo.toml`
-- lockfiles
-- target metadata
-- generated runtime bindings
-- source maps or source spans
-- incremental build cache
-- crumbs from the latest bake
-- backend-specific files for firmware, wasm, desktop, or test builds
+## `proof`
 
-The compiler writes generated Rust projects into `.oven/` beside the source file:
+`proof` checks source without writing a bakery or building an artifact.
+
+```bash
+rx proof app.flour
+```
+
+`check` remains a plain-word alias for `proof`.
+
+## `bakery`
+
+`bakery` is the generated build workspace/cache.
+
+The directory is:
 
 ```txt
-examples/bounce/.oven/
+.bakery/
 ```
 
-## `loaf`
+It contains generated Rust, generated manifests, lockfiles, Cargo output, and other intermediate build files. It is not the shipped app; it is the workspace Crustini uses to turn source into a normal artifact.
 
-`loaf` is the final artifact produced by a successful bake.
-
-Depending on target, a loaf may be:
-
-- a native binary
-- a static library
-- firmware image
-- wasm bundle
-- simulator bundle
-- packaged example
-- test fixture artifact
-
-The key rule is that a loaf is what the user can run, flash, ship, publish, or inspect as the output of a bake. Generated Rust is usually oven material, not the loaf itself, unless the user explicitly asked for source emission as the artifact.
-
-The CLI should eventually make the loaf path obvious:
+Example:
 
 ```txt
-Baked app.flour
-Loaf: target/crustini/app
-Oven: .oven/
-Crumbs: .oven/crumbs/latest.log
+examples/bounce/
+  app.flour
+  .bakery/
+    Cargo.toml
+    src/lib.rs
+    target/
 ```
 
-## `crumbs`
-
-`crumbs` are diagnostics, logs, notes, warnings, errors, traces, and build metadata.
-
-Crumbs should answer:
-
-- What source file was baked?
-- Which target was selected?
-- Which generated files changed?
-- Which phase failed?
-- What source span caused the issue?
-- What command was invoked under the hood?
-- Where did the loaf go?
-- Which warnings should the user act on?
-
-Crumbs can be shown in:
-
-- CLI output
-- machine-readable JSON
-- editor diagnostics
-- site playground logs
-- CI summaries
-- `.oven/crumbs/` files
-
-Crumbs should be terse by default and expandable when debugging. The user should not have to read raw Cargo output first when the problem is a Crustini source problem.
-
-Good crumb style:
-
-```txt
-error[E020]: unknown draw command `circ`
-  --> app.flour:28:5
-   |
-28 |     circ x y 8 255
-   |     ^^^^ did you mean `circle`?
-
-bake failed before Rust generation
-```
-
-Raw backend output can still be attached as lower-level crumbs.
+Why not `oven`: Oven is already strongly associated with Bun's company/tooling, so Crustini should not use it.
 
 ## `starter`
 
-`starter` means a project template or scaffold.
+`starter` is a project template.
 
-A starter should include enough structure to bake immediately:
+The default tiny starter is:
+
+```bash
+cargo run --bin rx -- starter hello my-hello
+cargo run --bin rx -- bake my-hello/app.flour
+```
+
+A starter should be simple enough to bake immediately:
 
 ```txt
-counter/
+my-hello/
   app.flour
   crustini.toml
   README.md
 ```
 
-Later starter commands might look like:
+## Current Mapping
 
-```bash
-crustini starter counter my-counter
-crustini starter display/st7789 tiny-display
-crustini starter wasm-pixels web-demo
-```
-
-Starter docs should describe:
-
-- target hardware or runtime
-- display assumptions
-- input assumptions
-- bake command
-- expected loaf
-- where crumbs are written
-
-Current transition note: `examples/` currently acts as the rough starter inventory, but examples and starters should eventually be split. Examples prove compiler behavior; starters are user-facing scaffolds.
-
-## Full Lifecycle
-
-The target workflow should feel like this:
-
-```txt
-create starter
-  -> edit .flour
-  -> bake
-  -> inspect crumbs
-  -> run loaf
-  -> repeat
-```
-
-In more detail:
-
-1. A user creates a starter.
-2. The starter gives them an `app.flour` and target config.
-3. They edit source in an editor with `.flour` highlighting.
-4. They run `bake`.
-5. The compiler validates the source and writes generated files into the oven.
-6. The backend build runs inside or against the oven.
-7. Diagnostics and logs are stored as crumbs.
-8. A successful bake produces a loaf.
-9. The user runs, flashes, previews, or publishes the loaf.
-
-## Naming Boundaries
-
-The themed terms should be useful, not cute at the expense of clarity. Use them where they map cleanly to concrete toolchain concepts.
-
-Use product terms for user-facing concepts:
-
-| Product term | Generic term |
+| Concept | Current implementation |
 | --- | --- |
-| `.flour` | source file |
-| `bake` | compile/build |
-| `oven` | generated workspace/build cache |
-| `loaf` | binary/artifact |
-| `crumbs` | diagnostics/logs |
-| `starter` | template/scaffold |
+| Source | `.flour`; `.crst` still works as an old alias |
+| Command | `rx` |
+| Project config | `recipe.flour` |
+| Check command | `rx proof`; `check` still works |
+| Build command | `rx bake`; `build` still works |
+| Generated workspace | `.bakery/` |
+| Project generated workspace | `.crustini/generated/` |
+| Generated Rust | `.bakery/src/lib.rs` |
+| Artifact | Cargo output under `.bakery/target/` |
+| Starter | `rx starter hello <dir>` |
 
-Use technical terms when precision matters:
+## Writing Rules
 
-- Rust crate
-- `#![no_std]`
-- Cargo manifest
-- parser
-- emitter
-- runtime
-- target triple
-- linker script
-- source span
-- diagnostic code
+- Use `.flour`, `rx`, `recipe.flour`, `proof`, `bake`, `bakery`, and `starter`.
+- Do not use `oven`, `loaf`, or `crumbs` as product terms.
+- Say `artifact`, not `loaf`.
+- Say `diagnostics` or `logs`, not `crumbs`.
+- Say `generated Rust` when that is what you mean.
+- Keep command examples real and prefer `.flour`.
 
-Do not force the metaphor into internals where it hides meaning. For example, `emit_rust.rs` is a better implementation filename than `shape_loaf.rs`.
-
-## Current Repo Mapping
-
-| Future/product concept | Current path or command |
-| --- | --- |
-| `.flour` source | `app.flour`; existing fixtures include `examples/bounce/app.crst`, `examples/counter/app.crst` |
-| `bake` | `cargo run -p crustini -- bake <file.flour>` |
-| source emission | `cargo run -p crustini -- emit <file.crst>` |
-| `oven` | `<example>/.oven/` |
-| generated Rust | `<example>/.oven/src/lib.rs` |
-| loaf | Cargo output for generated crate |
-| crumbs | CLI errors and Cargo output |
-| starter | `cargo run -p crustini -- starter counter <dir>` |
-
-## Migration Plan
-
-The documentation can move first, but implementation should migrate in small compatibility-preserving steps.
-
-1. Accept `.flour` files anywhere `.crst` files are accepted. Done.
-2. Add `bake` as a CLI command alias for `build`. Done.
-3. Write generated workspaces to `.oven/`. Done.
-4. Add a tiny `starter counter` scaffold. Done.
-5. Update examples or duplicate one example as `app.flour`.
-6. Teach syntax packages and editor extensions to recognize `.flour`.
-7. Add crumb formatting with source spans and diagnostic codes.
-8. Split user-facing starters from compiler regression examples.
-9. Make site examples use `.flour` once the example files are migrated.
-
-Compatibility rule: old `.crst` fixtures should keep working until there is an explicit breaking-change decision.
-
-## Open Questions
-
-- Should the CLI binary remain `crustini`, or should there eventually be a shorter dedicated command?
-- Should `loaf` refer only to executable artifacts, or also to generated libraries and firmware bundles?
-- Should crumbs be written by default, or only when a bake fails or verbose mode is enabled?
-- Should starters live in `starters/`, `templates/`, or remain in `examples/` until the language stabilizes?
-
-## Writing Guidelines
-
-Use this sentence shape when introducing the toolchain:
+Recommended short description:
 
 ```txt
-Crustini bakes `.flour` source into a loaf through a generated Rust oven, with crumbs for diagnostics.
+Crustini bakes `.flour` source into generated `#![no_std]` Rust in `.bakery/`, then Cargo builds a normal artifact.
 ```
-
-Use this shape when being more precise:
-
-```txt
-Today, `crustini bake` reads `.flour` source, emits a generated `#![no_std]` Rust crate into `.oven/`, and lets Cargo build it. Existing `.crst` source still works as a compatibility path.
-```
-
-Avoid writing docs that only use the metaphor without the real technical noun nearby. First-time readers should be able to understand both the friendly vocabulary and the underlying build system.

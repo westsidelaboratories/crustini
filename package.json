@@ -9,17 +9,24 @@
     "editors/vscode"
   ],
   "scripts": {
-    "build": "bun run build:rust && bun run build:site",
+    "build": "bun scripts/build.ts",
     "build:rust": "cargo build --workspace",
     "build:site": "bun --filter @crustini/site build",
-    "check": "bun run check:rust && bun run check:examples && bun run check:site",
-    "check:examples": "cargo run -p crustini -- build examples/bounce/app.crst && cargo run -p crustini -- build examples/counter/app.crst",
+    "bake:example": "bun scripts/bake-example.ts",
+    "check": "bun scripts/check.ts",
+    "check:examples": "cargo run --bin rx -- bake examples/all-macros/app.flour && cargo run --bin rx -- bake examples/bounce/app.flour && cargo run --bin rx -- bake examples/counter/app.flour && cargo run --bin rx -- bake examples/hood-wars",
     "check:rust": "cargo check --workspace",
+    "check:scripts": "tsc --noEmit -p tsconfig.json",
     "check:site": "bun --filter @crustini/site check",
+    "ci": "bun scripts/ci.ts",
+    "clean": "bun scripts/clean.ts",
+    "clean:dry": "bun scripts/clean.ts --dry-run",
+    "port:clean": "bun scripts/port-clean.ts",
     "site:dev": "bun --filter @crustini/site dev",
     "site:preview": "bun --filter @crustini/site preview"
   },
   "devDependencies": {
+    "@types/bun": "^1.3.14",
     "astro": "^6.4.4",
     "typescript": "^6.0.3"
   }

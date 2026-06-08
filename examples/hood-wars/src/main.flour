@@ -1,0 +1,44 @@
+app! {
+  state! {
+    player_x: i16 = 72
+    player_y: i16 = 40
+    color: u8 = 180
+  }
+
+  update! {
+    if right {
+      player_x = player_x + 1
+    }
+
+    if left {
+      player_x = player_x - 1
+    }
+
+    if down {
+      player_y = player_y + 1
+    }
+
+    if up {
+      player_y = player_y - 1
+    }
+
+    if a {
+      color = 255
+    }
+
+    if b {
+      color = 120
+    }
+  }
+
+  draw! {
+    clear!(8)
+    rect!(0, 0, 160, 12, 28)
+    text!(8, 3, "HOOD WARS", 255)
+    line!(0, 76, 159, 76, 60)
+    rect!(20, 28, 120, 36, 18)
+    rect!(player_x, player_y, 10, 10, color)
+    circle!(player_x + 5, player_y - 3, 3, 220)
+    text!(8, 80, "ARROWS MOVE  A/B COLOR", 180)
+  }
+}

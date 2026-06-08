@@ -15,11 +15,11 @@ export const crsHighlightJs: LanguageFn = function(hljs) {
       hljs.QUOTE_STRING_MODE,
       {
         className: "meta",
-        begin: "\\bapp!\\b"
+        begin: "\\b[A-Za-z_][A-Za-z0-9_]*!"
       },
       {
         className: "keyword",
-        begin: "\\b(?:name|target|display|input|button|state|screen|draw|on|every|const|goto)\\b"
+        begin: "\\b(?:app|name|target|display|input|button|state|screen|fps|setup|update|draw|on|every|const|goto)\\b"
       },
       {
         className: "number",

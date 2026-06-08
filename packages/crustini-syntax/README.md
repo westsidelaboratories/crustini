@@ -2,7 +2,7 @@
 
 Permanent syntax highlighting kit for Crustini source files.
 
-Crustini product vocabulary is moving toward `.flour` for user-authored source. This package still has `.crs` names in tokenizer classes, TextMate scopes, and examples because those are current implementation names. Treat `.crs` as transitional syntax-package naming and `.flour` as the direction for editor/file-extension UX.
+Crustini source uses `.flour` for user-authored files. This package still has `.crs` names in tokenizer classes and TextMate scopes because those are current implementation names. Treat `.crs` as transitional syntax-package naming and `.flour` as the source file UX.
 
 This is intentionally small and dependency-light. It gives you the same visual language in every place you care about:
 
@@ -33,13 +33,16 @@ The TextMate grammar powers VS Code and Shiki-style renderers.
 <script src="/dist/crustini-highlight.js"></script>
 
 <pre class="crs-code"><code class="language-crs">app! {
-  name: "Demo"
+  screen!(240, 135)
+  fps!(30)
 
-  screen Main {
-    draw {
-      clear(BLACK)
-      text(8, 8, "Hello", color: WHITE)
-    }
+  state! {
+    count: i32 = 0
+  }
+
+  draw! {
+    clear!(0)
+    rect!(8, 8, 80, 24, 12)
   }
 }</code></pre>
 
@@ -56,7 +59,8 @@ import { crsLanguage } from "@crustini/syntax/codemirror";
 
 new EditorView({
   doc: `app! {
-  name: "Demo"
+  screen!(240, 135)
+  fps!(30)
 }`,
   extensions: [
     basicSetup,

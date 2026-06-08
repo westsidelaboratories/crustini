@@ -1,0 +1,39 @@
+app! {
+  screen!(128, 64)
+  fps!(30)
+
+  state! {
+    x: i16 = 12
+    y: i16 = 12
+    shade: u8 = 180
+  }
+
+  setup! {
+    clear!(0)
+    pixel!(1, 1, 255)
+  }
+
+  update! {
+    if right {
+      x = x + 1
+    }
+
+    if left {
+      x = x - 1
+    }
+
+    if a {
+      shade = 255
+    }
+  }
+
+  draw! {
+    clear!(0)
+    set!(2, 2, 80)
+    pixel!(3, 2, 120)
+    rect!(x, y, 16, 10, shade)
+    circle!(64, 32, 8, 200)
+    line!(0, 63, 127, 0, 160)
+    text!(8, 8, "BASIC MACROS", 255)
+  }
+}

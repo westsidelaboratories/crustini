@@ -1,18 +1,18 @@
 app! {
-  screen 240 135
-  fps 30
+  screen!(240, 135)
+  fps!(30)
 
-  state {
+  state! {
     x: i16 = 120
     y: i16 = 67
     vx: i16 = 1
   }
 
-  setup {
-    clear 0
+  setup! {
+    clear!(0)
   }
 
-  update {
+  update! {
     x = x + vx
 
     if x > 232 {
@@ -24,8 +24,8 @@ app! {
     }
   }
 
-  draw {
-    clear 12
-    circle x y 8 255
+  draw! {
+    clear!(12)
+    circle!(x, y, 8, 255)
   }
 }

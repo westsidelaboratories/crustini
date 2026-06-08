@@ -7,8 +7,8 @@ const CRS = (() => {
   ]);
 
   const declarations = new Set([
-    "name", "target", "display", "input", "button", "state",
-    "screen", "draw", "on", "every", "const", "goto"
+    "app", "name", "target", "display", "input", "button", "state",
+    "screen", "fps", "setup", "update", "draw", "on", "every", "const", "goto"
   ]);
 
   const types = new Set([
@@ -98,8 +98,8 @@ const CRS = (() => {
         const word = line.slice(i, j);
         const rest = line.slice(j);
 
-        if (word === "app" && rest.startsWith("!")) {
-          out += span("crs-macro", "app!");
+        if (rest.startsWith("!")) {
+          out += span("crs-macro", `${word}!`);
           i = j + 1;
           continue;
         }

@@ -1,7 +1,7 @@
 {
   "name": "crustini-syntax",
   "displayName": "Crustini Syntax",
-  "description": "Syntax highlighting for Crustini .crs files.",
+  "description": "Syntax highlighting for Crustini .flour files.",
   "version": "0.0.1",
   "publisher": "crustini",
   "engines": {
@@ -16,10 +16,13 @@
         "id": "crs",
         "aliases": [
           "Crustini",
+          "flour",
           "crs"
         ],
         "extensions": [
-          ".crs"
+          ".flour",
+          ".crs",
+          ".crst"
         ],
         "configuration": "./language-configuration.json"
       }

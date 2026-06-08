@@ -11,7 +11,11 @@
     },
     {
       "name": "keyword.declaration.crustini",
-      "match": "\\b(app|state|setup|update|draw|screen|fps)\\b|app!"
+      "match": "\\b(app|state|setup|update|draw|screen|fps)\\b"
+    },
+    {
+      "name": "entity.name.function.macro.crustini",
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*!"
     },
     {
       "name": "storage.type.crustini",

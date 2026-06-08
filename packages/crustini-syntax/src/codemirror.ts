@@ -9,8 +9,8 @@ const keywords = words([
 ]);
 
 const declarations = words([
-  "name", "target", "display", "input", "button", "state",
-  "screen", "draw", "on", "every", "const", "goto"
+  "app", "name", "target", "display", "input", "button", "state",
+  "screen", "fps", "setup", "update", "draw", "on", "every", "const", "goto"
 ]);
 
 const types = words([

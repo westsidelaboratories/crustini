@@ -25,33 +25,38 @@ That is the easiest version that is still genuinely useful.
 Vocabulary we are going with:
 
 .flour source code
+rx     command
+proof  check/validate without building
 bake   compile/build
-oven   build cache/runtime target dir
-loaf   final binary/artifact
-crumbs diagnostics/logs
+bakery generated build workspace/cache
 starter project template
 
-Use the themed terms in user-facing docs, site copy, examples,
+Use only these themed terms in user-facing docs, site copy, examples,
 CLI planning, and agent notes.
+
+Use plain words for artifact, diagnostics, logs, generated Rust,
+runtime, target, and cache details.
 
 Keep technical precision beside the themed word:
 
 - .flour is the user-authored Crustini source file.
+- rx is the short command users type.
+- proof validates source without writing a bakery or building.
 - bake is the action that parses, validates, emits Rust, and runs the backend build.
-- oven is the generated workspace/cache/runtime target directory.
-- loaf is the final artifact a user can run, flash, ship, or inspect.
-- crumbs are diagnostics, logs, warnings, source spans, backend output, and build metadata.
+- bakery is the generated workspace/cache directory.
 - starter is a scaffolded project that can bake immediately.
 
 Current repo names:
 
 - .flour is accepted as the source suffix.
 - .crst examples still work as compatibility fixtures.
-- .oven/ is the generated oven directory.
-- crustini bake is the current bake command.
-- crustini build still works as a compatibility alias.
-- crustini starter counter <dir> creates the first tiny starter.
+- .bakery/ is the generated build workspace.
+- rx proof is the current source validation command.
+- rx bake is the current bake command.
+- rx build still works as a compatibility alias.
+- rx starter hello <dir> creates the default tiny starter.
 
 Do not expose Rust borrowing to users.
 Do not make users reason about generated crates first.
-The user edits flour, bakes it, checks crumbs, and gets a loaf.
+The user edits flour, bakes it, reads diagnostics if needed,
+and gets a normal artifact.

@@ -25,8 +25,8 @@ export const CRS_KEYWORDS = new Set([
 ]);
 
 export const CRS_DECLARATIONS = new Set([
-  "name", "target", "display", "input", "button", "state",
-  "screen", "draw", "on", "every", "const", "goto"
+  "app", "name", "target", "display", "input", "button", "state",
+  "screen", "fps", "setup", "update", "draw", "on", "every", "const", "goto"
 ]);
 
 export const CRS_TYPES = new Set([
@@ -121,8 +121,8 @@ export function tokenizeCrsLine(line: string): CrsToken[] {
       const word = line.slice(i, j);
       const rest = line.slice(j);
 
-      if (word === "app" && rest.startsWith("!")) {
-        tokens.push({ kind: "macro", value: "app!" });
+      if (rest.startsWith("!")) {
+        tokens.push({ kind: "macro", value: `${word}!` });
         i = j + 1;
         continue;
       }

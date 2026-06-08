@@ -155,7 +155,10 @@ fn emit_stmt(
 }
 
 fn is_screen_call(name: &str) -> bool {
-    matches!(name, "clear" | "pixel" | "set" | "rect" | "circle" | "line")
+    matches!(
+        name,
+        "clear" | "pixel" | "set" | "rect" | "circle" | "line" | "text"
+    )
 }
 
 fn screen_method_name(name: &str) -> &str {

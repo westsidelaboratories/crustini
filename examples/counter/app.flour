@@ -1,13 +1,13 @@
 app! {
-  screen 240 135
-  fps 30
+  screen!(240, 135)
+  fps!(30)
 
-  state {
+  state! {
     ticks: u32 = 0
     x: i16 = 10
   }
 
-  update {
+  update! {
     ticks = ticks + 1
 
     if right {
@@ -19,8 +19,8 @@ app! {
     }
   }
 
-  draw {
-    clear 0
-    rect x 20 20 20 200
+  draw! {
+    clear!(0)
+    rect!(x, 20, 20, 20, 200)
   }
 }

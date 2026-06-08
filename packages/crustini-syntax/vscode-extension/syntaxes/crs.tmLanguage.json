@@ -70,7 +70,7 @@
       "patterns": [
         {
           "name": "entity.name.function.macro.crs",
-          "match": "\\bapp!(?=\\s*\\{)"
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*!"
         }
       ]
     },
@@ -86,7 +86,7 @@
       "patterns": [
         {
           "name": "storage.type.declaration.crs",
-          "match": "\\b(?:name|target|display|input|button|state|screen|draw|on|every|const|goto)\\b"
+          "match": "\\b(?:app|name|target|display|input|button|state|screen|fps|setup|update|draw|on|every|const|goto)\\b"
         }
       ]
     },
@@ -122,7 +122,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.crs",
-          "match": "\\b(?:clear|pixel|line|rect|fill_rect|circle|text|bitmap|sprite|flush|progress|menu|card|meter|toggle|slider|redraw|min|max|clamp)(?=\\s*\\()"
+          "match": "\\b(?:clear|pixel|line|rect|fill_rect|circle|text|bitmap|sprite|flush|progress|menu|card|meter|toggle|slider|redraw|min|max|clamp)\\b"
         }
       ]
     },

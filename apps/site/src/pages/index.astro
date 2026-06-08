@@ -3,20 +3,20 @@ import { renderCrsBlock } from "@crustini/syntax";
 import "../styles/global.css";
 
 const example = `app! {
-  screen 240 135
-  fps 30
+  screen!(240, 135)
+  fps!(30)
 
-  state {
+  state! {
     x: i16 = 120
     y: i16 = 67
     vx: i16 = 1
   }
 
-  setup {
-    clear 0
+  setup! {
+    clear!(0)
   }
 
-  update {
+  update! {
     x = x + vx
 
     if x > 232 {
@@ -28,9 +28,9 @@ const example = `app! {
     }
   }
 
-  draw {
-    clear 12
-    circle x y 8 255
+  draw! {
+    clear!(12)
+    circle!(x, y, 8, 255)
   }
 }`;
 ---
@@ -80,11 +80,13 @@ const example = `app! {
       <section id="build" class="section">
         <div class="shell">
           <h2>Build</h2>
-          <p>A bake emits a generated Rust crate into the oven, then Cargo builds that crate against <code>crustini-core</code>. The current oven directory is <code>.oven/</code>, with <code>build</code> kept as a compatibility alias.</p>
+          <p>A bake emits a generated Rust crate into the bakery, then Cargo builds that crate against <code>crustini-core</code>. The current bakery directory is <code>.bakery/</code>, with <code>build</code> kept as a compatibility alias.</p>
           <div class="commands" aria-label="Build commands">
-            <code>cargo run -p crustini -- starter counter my-counter</code>
-            <code>cargo run -p crustini -- bake my-counter/app.flour</code>
-            <code>cargo run -p crustini -- emit examples/bounce/app.crst</code>
+            <code>cargo run --bin rx -- starter hello my-hello</code>
+            <code>cargo run --bin rx -- starters</code>
+            <code>cargo run --bin rx -- proof my-hello/app.flour</code>
+            <code>cargo run --bin rx -- bake my-hello/app.flour</code>
+            <code>cargo run --bin rx -- emit examples/bounce/app.flour</code>
           </div>
         </div>
       </section>
@@ -107,7 +109,7 @@ const example = `app! {
             </article>
             <article class="tile">
               <h3>Vocabulary</h3>
-              <p><code>.flour</code> source is baked in an oven to produce a loaf. Crumbs are diagnostics and logs. Starters are project templates.</p>
+              <p><code>.flour</code> source is baked in a <code>.bakery/</code> workspace to produce a normal artifact. Starters are project templates.</p>
             </article>
           </div>
         </div>

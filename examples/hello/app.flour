@@ -1,0 +1,13 @@
+app! {
+  screen!(128, 64)
+  fps!(30)
+
+  setup! {
+    clear!(0)
+  }
+
+  draw! {
+    clear!(0)
+    text!(28, 24, "HELLO WORLD!", 255)
+  }
+}

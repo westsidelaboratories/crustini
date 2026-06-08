@@ -1,0 +1,32 @@
+project!:
+  name "hood-wars"
+  version "0.1.0"
+
+target!:
+  board desktop_sim
+
+screen!:
+  size 160, 90
+  fps 30
+
+memory!:
+  mode static
+  scratch 16.kb
+  heap off
+
+buttons!:
+  up
+  down
+  left
+  right
+  a
+  b
+  start
+
+assets!:
+  map "assets/world.map"
+
+build!:
+  optimize size
+  panic abort
+  generated ".crustini/generated"

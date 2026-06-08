@@ -1,7 +1,7 @@
 {
   "name": "@crustini/syntax",
   "version": "0.0.1",
-  "description": "Permanent syntax highlighting kit for Crustini .crs files.",
+  "description": "Permanent syntax highlighting kit for Crustini .flour files.",
   "type": "module",
   "sideEffects": false,
   "exports": {

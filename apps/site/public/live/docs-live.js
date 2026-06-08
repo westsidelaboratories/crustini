@@ -8,58 +8,38 @@ Vocabulary:
 
 - \`.flour\` is source code.
 - \`bake\` is compile/build.
-- \`oven\` is the generated build workspace and runtime target directory.
-- \`loaf\` is the final binary, firmware, wasm bundle, or artifact.
-- \`crumbs\` are diagnostics, logs, warnings, errors, traces, and build metadata.
+- \`bakery\` is the generated build workspace/cache.
 - \`starter\` is a project template.
 
-We use \`app!\` as the root macro.
+Use plain words for artifacts, diagnostics, logs, generated Rust, and runtime details.
+
+We use macro-shaped source. \`app!\` is the root macro, and sections/calls can stay macro-flavored too.
 
 The first UI layer is not LVGL. It is tiny immediate-mode drawing plus MiniUI helpers.
 
-\`\`\`crs
+\`\`\`flour
 app! {
-  name: "TinyCounter"
+  screen!(240, 135)
+  fps!(30)
 
-  target: esp32_s3
-
-  display: st7789 {
-    width: 240
-    height: 135
-    color: rgb565
-    rotation: landscape
-  }
-
-  input {
-    button a
-    button b
-  }
-
-  state {
+  state! {
     count: i32 = 0
   }
 
-  screen Main {
-    draw {
-      clear(BLACK)
-
-      text(8, 8, "COUNT", color: WHITE, font: bold_12)
-      line(8, 24, 232, 24, color: GRAY)
-
-      text(8, 52, count, color: GREEN, font: bold_16)
-
-      text(8, 116, "A:+  B:-", color: GRAY)
-    }
-
-    on button.a {
+  update! {
+    if a {
       count = count + 1
-      redraw()
     }
 
-    on button.b {
+    if b {
       count = count - 1
-      redraw()
     }
+  }
+
+  draw! {
+    clear!(0)
+    rect!(8, 8, 224, 119, 24)
+    line!(8, 34, 232, 34, 96)
   }
 }
 \`\`\`
@@ -107,7 +87,7 @@ function renderDocs(md) {
 
   function flushCode() {
     const raw = code.join("\n");
-    if (codeLang === "crs" || codeLang === "crustini") {
+    if (codeLang === "flour" || codeLang === "crs" || codeLang === "crustini") {
       html += `<pre class="crs-code"><code class="language-crs">${CRS.highlight(raw, true)}</code></pre>\n`;
     } else {
       html += `<pre><code>${esc(raw)}</code></pre>\n`;
