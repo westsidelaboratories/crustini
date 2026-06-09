@@ -69,7 +69,7 @@ const example = `app! {
 
           <div class="code-frame" aria-label="Crustini source example">
             <div class="code-label">
-              <span>examples/bounce/app.flour</span>
+              <span>fixtures/apps/bounce/app.flour</span>
               <span>.flour</span>
             </div>
             <Fragment set:html={renderCrsBlock(example)} />
@@ -86,7 +86,7 @@ const example = `app! {
             <code>cargo run --bin rx -- starters</code>
             <code>cargo run --bin rx -- proof my-hello/app.flour</code>
             <code>cargo run --bin rx -- bake my-hello/app.flour</code>
-            <code>cargo run --bin rx -- emit examples/bounce/app.flour</code>
+            <code>cargo run --bin rx -- emit fixtures/apps/bounce/app.flour</code>
           </div>
         </div>
       </section>
@@ -105,7 +105,7 @@ const example = `app! {
             </article>
             <article class="tile">
               <h3>Apps</h3>
-              <p><code>apps/site</code> is the Astro site. Examples remain in <code>examples/</code> as source fixtures for the compiler.</p>
+              <p><code>apps/site</code> is the Astro site. Real apps live in <code>examples/</code>; compiler fixtures live in <code>fixtures/</code>.</p>
             </article>
             <article class="tile">
               <h3>Vocabulary</h3>

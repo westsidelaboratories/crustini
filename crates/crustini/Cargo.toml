@@ -8,6 +8,9 @@ license.workspace = true
 name = "crustini"
 path = "src/lib.rs"
 
+[dependencies]
+crustini-lang = { path = "../crustini-lang" }
+
 [[bin]]
 name = "crustini"
 path = "src/main.rs"

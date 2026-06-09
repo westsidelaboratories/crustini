@@ -1,0 +1,62 @@
+app! {
+  screen!(180, 120)
+  fps!(30)
+
+  state! {
+    x: i16 = 90
+    y: i16 = 60
+    pulse: i16 = 0
+    pulse_dir: i16 = 1
+    shade: u8 = 170
+    clicked: bool = false
+  }
+
+  update! {
+    x = mouse_x
+    y = mouse_y
+
+    pulse = pulse + pulse_dir
+
+    if pulse > 14 {
+      pulse_dir = -1
+    }
+
+    if pulse < 0 {
+      pulse_dir = 1
+    }
+
+    if mouse_down {
+      shade = 255
+      clicked = true
+    }
+
+    if mouse_down == false {
+      shade = 170
+      clicked = false
+    }
+  }
+
+  draw! {
+    clear!(5)
+    text!(40, 6, "MOUSE ORBIT", 220)
+    line!(0, 18, 179, 18, 50)
+
+    circle!(x, y, 4, 255)
+    circle!(x - pulse, y, 3, shade)
+    circle!(x + pulse, y, 3, shade)
+    circle!(x, y - pulse, 3, shade)
+    circle!(x, y + pulse, 3, shade)
+
+    line!(x - 16, y, x + 16, y, 90)
+    line!(x, y - 16, x, y + 16, 90)
+
+    if clicked {
+      circle!(x, y, 12, 110)
+      text!(56, 106, "CLICK", 240)
+    }
+
+    if clicked == false {
+      text!(34, 106, "MOVE AND CLICK", 140)
+    }
+  }
+}

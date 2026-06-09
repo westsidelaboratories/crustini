@@ -1,3 +1,6 @@
+use crate::macros::app::AppMacro;
+use crate::macros::block::BlockMacro;
+use crate::macros::screen::{ScreenArgs, ScreenMacro};
 use crate::model::{App, StateField, Stmt};
 
 struct Line {
@@ -39,24 +42,24 @@ fn scan_indented_app(src: &str) -> Result<App, String> {
             return Err(err(line, "unexpected indentation"));
         }
 
-        match section_name(&line.text).as_str() {
-            "state" => {
+        match BlockMacro::parse(&section_name(&line.text)) {
+            Some(BlockMacro::State) => {
                 i += 1;
                 app.state = parse_state(&lines, &mut i, line.indent)?;
             }
-            "setup" => {
+            Some(BlockMacro::Setup) => {
                 i += 1;
                 app.setup = parse_stmts(&lines, &mut i, line.indent)?;
             }
-            "update" => {
+            Some(BlockMacro::Update) => {
                 i += 1;
                 app.update = parse_stmts(&lines, &mut i, line.indent)?;
             }
-            "draw" => {
+            Some(BlockMacro::Draw) => {
                 i += 1;
                 app.draw = parse_stmts(&lines, &mut i, line.indent)?;
             }
-            _ => {
+            None => {
                 parse_app_line(&line.text, &mut app).map_err(|msg| err(line, &msg))?;
                 i += 1;
                 reject_child(&lines, i, line.indent)?;
@@ -96,12 +99,12 @@ fn parse_braced_app_body(body: &str) -> Result<App, String> {
                 let close = find_matching_brace(body, j)?;
                 let block_body = &body[j + 1..close];
 
-                match ident.as_str() {
-                    "state" => app.state = parse_braced_state_block(block_body)?,
-                    "setup" => app.setup = parse_braced_stmt_block(block_body)?,
-                    "update" => app.update = parse_braced_stmt_block(block_body)?,
-                    "draw" => app.draw = parse_braced_stmt_block(block_body)?,
-                    other => return Err(format!("unknown block macro `{}`", other)),
+                match BlockMacro::parse(&ident) {
+                    Some(BlockMacro::State) => app.state = parse_braced_state_block(block_body)?,
+                    Some(BlockMacro::Setup) => app.setup = parse_braced_stmt_block(block_body)?,
+                    Some(BlockMacro::Update) => app.update = parse_braced_stmt_block(block_body)?,
+                    Some(BlockMacro::Draw) => app.draw = parse_braced_stmt_block(block_body)?,
+                    None => return Err(format!("unknown block macro `{}`", ident)),
                 }
 
                 i = close + 1;
@@ -124,19 +127,19 @@ fn parse_braced_app_line(line: &str, app: &mut App) -> Result<(), String> {
     }
 
     if let Some((name, args)) = parse_paren_call(line)? {
-        match name.as_str() {
-            "screen" => {
+        match AppMacro::parse(&name) {
+            Some(AppMacro::Screen) => {
                 parse_screen_args(&args, app)?;
                 Ok(())
             }
-            "fps" => {
+            Some(AppMacro::Fps) => {
                 if args.len() != 1 {
                     return Err("fps! expects `fps!(FPS)`".to_string());
                 }
                 app.fps = int(&args[0], "fps")?;
                 Ok(())
             }
-            _ => Err(format!("unknown app macro `{}`", name)),
+            None => Err(format!("unknown app macro `{}`", name)),
         }
     } else {
         parse_app_line(line, app)
@@ -235,6 +238,7 @@ fn parse_braced_stmt_line(line: &str) -> Result<Stmt, String> {
     }
 
     if let Some((name, args)) = parse_paren_call(line)? {
+        validate_call_args(&name, args.len())?;
         return Ok(Stmt::Call { name, args });
     }
 
@@ -412,8 +416,8 @@ fn parse_app_line(text: &str, app: &mut App) -> Result<(), String> {
     let (head, rest) = split_head(text).ok_or("empty app line")?;
     let rest = rest.trim().trim_start_matches(':').trim();
 
-    match head {
-        "screen" => {
+    match AppMacro::parse(head) {
+        Some(AppMacro::Screen) => {
             if let Some((w, h)) = rest.split_once('x') {
                 app.width = int(w.trim(), "screen width")?;
                 app.height = int(h.trim(), "screen height")?;
@@ -429,11 +433,11 @@ fn parse_app_line(text: &str, app: &mut App) -> Result<(), String> {
             app.height = int(parts[1], "screen height")?;
             Ok(())
         }
-        "fps" => {
+        Some(AppMacro::Fps) => {
             app.fps = int(rest, "fps")?;
             Ok(())
         }
-        _ => Err(format!("unknown app line `{}`", text)),
+        None => Err(format!("unknown app line `{}`", text)),
     }
 }
 
@@ -518,10 +522,29 @@ fn parse_stmt(text: &str) -> Result<Stmt, String> {
     let mut parts = text.split_whitespace();
     let name = parts.next().ok_or("empty statement")?;
     ident(name, "call name")?;
+    let args: Vec<String> = parts.map(str::to_string).collect();
+    validate_call_args(name, args.len())?;
     Ok(Stmt::Call {
         name: name.to_string(),
-        args: parts.map(str::to_string).collect(),
+        args,
     })
+}
+
+fn validate_call_args(name: &str, actual: usize) -> Result<(), String> {
+    let Some(screen_macro) = ScreenMacro::parse(name) else {
+        return Ok(());
+    };
+
+    match screen_macro.spec().args {
+        ScreenArgs::Exact(expected) if actual != expected => Err(format!(
+            "{}! expects {} argument{}, got {}",
+            name,
+            expected,
+            if expected == 1 { "" } else { "s" },
+            actual
+        )),
+        ScreenArgs::Exact(_) => Ok(()),
+    }
 }
 
 fn if_cond(text: &str) -> Option<String> {

@@ -1,0 +1,32 @@
+app! {
+  screen!(160, 90)
+  fps!(30)
+
+  state! {
+    ticks: u32 = 0
+    x: i16 = 12
+  }
+
+  setup! {
+    clear!(0)
+  }
+
+  update! {
+    ticks = ticks + 1
+
+    if right {
+      x = x + 2
+    }
+
+    if left {
+      x = x - 2
+    }
+  }
+
+  draw! {
+    clear!(8)
+    text!(12, 12, "CRUSTINI", 220)
+    rect!(x, 42, 24, 16, 180)
+    line!(0, 72, 159, 72, 90)
+  }
+}

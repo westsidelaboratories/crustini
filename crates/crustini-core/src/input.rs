@@ -6,4 +6,9 @@ pub struct Buttons {
     pub right: bool,
     pub a: bool,
     pub b: bool,
+    pub start: bool,
+    pub select: bool,
+    pub mouse_x: i16,
+    pub mouse_y: i16,
+    pub mouse_down: bool,
 }

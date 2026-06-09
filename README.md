@@ -21,17 +21,26 @@ This is intentionally crude. It is not a serious compiler yet. It is a tiny macr
 
 ```txt
 apps/site                 Astro website and docs tools
-crates/crustini           host compiler crate and CLI
+crates/crustini           rx CLI, project config, bakery orchestration
+crates/crustini-lang      .flour parser, app model, diagnostics, Rust emitter
 crates/crustini-core      no_std runtime crate used by generated apps
+crates/crustini-host      native std preview host for easy-mode rx run
+crates/crustini-web-host  parked browser preview host experiment
 packages/crustini-syntax  TypeScript syntax highlighting package
 editors/vscode            VS Code language extension
-examples                  app fixtures
+examples                  real runnable app examples
+fixtures                  compiler and CLI source fixtures
 scripts                   repo-level helper scripts
 ```
 
 ## Vocabulary
 
 The naming guide lives in [`docs/toolchain-vocabulary.md`](docs/toolchain-vocabulary.md).
+The basic project spec lives in [`docs/basic-project.md`](docs/basic-project.md).
+The language macro layout lives in [`docs/language-macros.md`](docs/language-macros.md).
+The early target-shape spec lives in [`docs/target-spec/`](docs/target-spec/).
+The source-sharing principle lives in [`docs/source-first-code-sharing.md`](docs/source-first-code-sharing.md).
+The examples compile walkthrough lives in [`examples/compiling.md`](examples/compiling.md).
 
 Short mapping:
 
@@ -43,24 +52,53 @@ Short mapping:
 | `proof` | Check/validate source without writing a bakery or building. |
 | `bake` | Build/compile action; `build` remains a compatibility alias. |
 | `bakery` | Generated build workspace/cache; current directory is `.bakery/`. |
-| `starter` | Project template; current rough equivalents are `examples/`. |
+| `starter` | Project template. |
 
 ## Shape
 
 ```txt
-.flour source
-  -> bake
+rx app.flour
   -> .bakery/
-  -> artifact
+  -> native preview window
+
+rx bake app.flour
+  -> .bakery/
+  -> artifact only
 ```
 
 Current implementation shape:
 
 ```txt
 .flour source
-  -> crustini host compiler
+  -> crustini-lang compiler
   -> generated no_std Rust crate in .bakery/
-  -> cargo build
+  -> rx runs native host for preview or cargo build for bake
+```
+
+## Run An App
+
+The easy path opens a native preview window:
+
+```bash
+cargo run --bin rx -- examples/brick-breaker/app.flour
+```
+
+After installing `rx`, that becomes:
+
+```bash
+rx examples/brick-breaker/app.flour
+```
+
+Inside a project directory with `recipe.flour`, a bare `rx` opens that project:
+
+```bash
+rx
+```
+
+Use `bake` when you only want the generated artifact:
+
+```bash
+rx bake examples/brick-breaker/app.flour
 ```
 
 ## Build the compiler
@@ -99,6 +137,7 @@ The Astro site lives in `apps/site` and imports the shared syntax package from `
 ```bash
 cargo run --bin rx -- starter hello my-hello
 cargo run --bin rx -- my-hello
+cargo run --bin rx -- my-hello/app.flour
 cargo run --bin rx -- proof my-hello
 cargo run --bin rx -- bake my-hello
 ```
@@ -167,7 +206,18 @@ Current basic macro set:
 | `line!(X0, Y0, X1, Y1, COLOR)` | setup/draw | Line. |
 | `text!(X, Y, "TEXT", COLOR)` | setup/draw | Tiny bitmap text. |
 
-The `examples/all-macros/app.flour` fixture covers that whole basic set.
+Current basic input names are available in `update!`:
+
+| Name | Meaning |
+| --- | --- |
+| `up`, `down`, `left`, `right` | Direction buttons. In preview, arrow keys and WASD. |
+| `a`, `b` | Action buttons. In preview, Space/Z and Enter/X. |
+| `start`, `select` | Menu buttons. In preview, Enter and Right Shift/Backspace. |
+| `mouse_x`, `mouse_y` | Mouse position in preview window coordinates. |
+| `mousex`, `mousey` | Short aliases for `mouse_x` and `mouse_y`. |
+| `mouse_down` | Left mouse button state. |
+
+The `fixtures/apps/all-macros/app.flour` fixture covers that whole basic set.
 
 ## Project shape
 
@@ -191,71 +241,83 @@ target!:
 screen!:
 memory!:
 buttons!:
+preview!:
 assets!:
 build!:
 ```
 
-The `examples/hood-wars` project is the first real project-shaped example:
+The optional `preview!:` block configures the local preview surface used by `rx run`; it is not part of the `.flour` language:
+
+```flour
+preview!:
+  title "Tiny Demo"
+  scale auto
+```
+
+Accepted scales are `auto`, `1x`, `2x`, `4x`, and `8x`.
+
+`fixtures/projects/hood-wars` is the first project-shaped fixture:
 
 ```bash
-cargo run --bin rx -- proof examples/hood-wars
-cargo run --bin rx -- bake examples/hood-wars
-cargo run --bin rx -- examples/hood-wars
+cargo run --bin rx -- proof fixtures/projects/hood-wars
+cargo run --bin rx -- bake fixtures/projects/hood-wars
+cargo run --bin rx -- fixtures/projects/hood-wars
 ```
 
 The bake path is still intentionally simple:
 
 ```txt
-examples/hello/app.flour
-  -> crustini parser
-  -> generated no_std Rust in examples/hello/.bakery/src/lib.rs
-  -> generated std preview host in examples/hello/.bakery/src/main.rs
-  -> cargo build
-  -> examples/hello/.bakery/target/debug/libcrustini_generated_hello.rlib
+fixtures/apps/bounce/app.flour
+  -> crustini-lang parser and Rust emitter
+  -> generated no_std Rust in fixtures/apps/bounce/.bakery/src/lib.rs
+  -> rx runs cargo build
+  -> fixtures/apps/bounce/.bakery/target/debug/libcrustini_generated_bounce.rlib
 ```
 
 For the most basic visible output, use `run`:
 
 ```bash
-cargo run --bin rx -- examples/hello/app.flour
+cargo run --bin rx -- examples/brick-breaker/app.flour
 ```
 
-That is the same as `rx run examples/hello/app.flour` after installing the tool. It bakes the app, runs one frame through the generated preview host, and writes:
+That is the same as `rx run examples/brick-breaker/app.flour` after installing the tool. It bakes the app library, writes a separate preview host under `.bakery/preview/`, opens a native window, and runs the app loop using the declared `screen!(WIDTH, HEIGHT)` and `fps!(FPS)`.
+
+For headless checks and CI, set `CRUSTINI_FRAME=1`. That runs one frame through the separate preview host and writes:
 
 ```txt
-examples/hello/.bakery/frame.ppm
+examples/brick-breaker/.bakery/frame.ppm
 ```
 
 Project output uses `.crustini/generated` from `recipe.flour`:
 
 ```txt
-examples/hood-wars/
+fixtures/projects/hood-wars/
   recipe.flour
   src/main.flour
   .crustini/generated/
     Cargo.toml
     src/lib.rs
-    src/main.rs
+    preview/
     frame.ppm
 ```
 
-## Generate and build the bounce example
+## Generate and build the bounce fixture
 
 ```bash
-cargo run --bin rx -- bake examples/bounce/app.flour
-cargo build --manifest-path examples/bounce/.bakery/Cargo.toml
+cargo run --bin rx -- bake fixtures/apps/bounce/app.flour
+cargo build --manifest-path fixtures/apps/bounce/.bakery/Cargo.toml
 ```
 
 ## Check without writing a bakery
 
 ```bash
-cargo run --bin rx -- proof examples/all-macros/app.flour
+cargo run --bin rx -- proof fixtures/apps/all-macros/app.flour
 ```
 
 ## Emit generated Rust to stdout
 
 ```bash
-cargo run --bin rx -- emit examples/bounce/app.flour
+cargo run --bin rx -- emit fixtures/apps/bounce/app.flour
 ```
 
 ## Crustini syntax currently supported

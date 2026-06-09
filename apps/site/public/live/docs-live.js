@@ -88,7 +88,7 @@ function renderDocs(md) {
   function flushCode() {
     const raw = code.join("\n");
     if (codeLang === "flour" || codeLang === "crs" || codeLang === "crustini") {
-      html += `<pre class="crs-code"><code class="language-crs">${CRS.highlight(raw, true)}</code></pre>\n`;
+      html += `<pre class="crs-code"><code class="language-flour">${CrustiniHighlight.highlight(raw, true)}</code></pre>\n`;
     } else {
       html += `<pre><code>${esc(raw)}</code></pre>\n`;
     }

@@ -1,0 +1,145 @@
+app! {
+  screen!(180, 120)
+  fps!(30)
+
+  state! {
+    player_x: i16 = 90
+    player_y: i16 = 96
+    dot_a_x: i16 = 18
+    dot_a_y: i16 = 18
+    dot_b_x: i16 = 132
+    dot_b_y: i16 = 42
+    dot_c_x: i16 = 74
+    dot_c_y: i16 = 66
+    tick: u32 = 0
+    score: u32 = 0
+    hit: bool = false
+  }
+
+  update! {
+    tick = tick + 1
+
+    if mouse_down {
+      player_x = mouse_x
+      player_y = mouse_y
+    }
+
+    if left {
+      player_x = player_x - 3
+    }
+
+    if right {
+      player_x = player_x + 3
+    }
+
+    if up {
+      player_y = player_y - 3
+    }
+
+    if down {
+      player_y = player_y + 3
+    }
+
+    if player_x < 4 {
+      player_x = 4
+    }
+
+    if player_x > 175 {
+      player_x = 175
+    }
+
+    if player_y < 20 {
+      player_y = 20
+    }
+
+    if player_y > 115 {
+      player_y = 115
+    }
+
+    dot_a_y = dot_a_y + 2
+    dot_b_y = dot_b_y + 3
+    dot_c_y = dot_c_y + 1
+
+    if dot_a_y > 124 {
+      dot_a_y = 18
+      dot_a_x = dot_a_x + 37
+      score = score + 1
+    }
+
+    if dot_b_y > 124 {
+      dot_b_y = 18
+      dot_b_x = dot_b_x + 53
+      score = score + 1
+    }
+
+    if dot_c_y > 124 {
+      dot_c_y = 18
+      dot_c_x = dot_c_x + 29
+      score = score + 1
+    }
+
+    if dot_a_x > 170 {
+      dot_a_x = dot_a_x - 150
+    }
+
+    if dot_b_x > 170 {
+      dot_b_x = dot_b_x - 150
+    }
+
+    if dot_c_x > 170 {
+      dot_c_x = dot_c_x - 150
+    }
+
+    hit = false
+
+    if player_x >= dot_a_x - 6 && player_x <= dot_a_x + 6 && player_y >= dot_a_y - 6 && player_y <= dot_a_y + 6 {
+      hit = true
+    }
+
+    if player_x >= dot_b_x - 6 && player_x <= dot_b_x + 6 && player_y >= dot_b_y - 6 && player_y <= dot_b_y + 6 {
+      hit = true
+    }
+
+    if player_x >= dot_c_x - 6 && player_x <= dot_c_x + 6 && player_y >= dot_c_y - 6 && player_y <= dot_c_y + 6 {
+      hit = true
+    }
+
+    if hit {
+      score = 0
+      dot_a_y = 18
+      dot_b_y = 42
+      dot_c_y = 66
+    }
+  }
+
+  draw! {
+    clear!(4)
+    rect!(0, 0, 180, 16, 18)
+    text!(8, 5, "DODGE DOTS", 240)
+    text!(100, 5, "MOVE", 120)
+
+    line!(0, 17, 179, 17, 60)
+    circle!(dot_a_x, dot_a_y, 4, 220)
+    circle!(dot_b_x, dot_b_y, 5, 180)
+    circle!(dot_c_x, dot_c_y, 3, 145)
+
+    if hit {
+      circle!(player_x, player_y, 10, 255)
+      text!(58, 58, "BONK", 255)
+    }
+
+    if hit == false {
+      circle!(player_x, player_y, 6, 255)
+      line!(player_x - 8, player_y, player_x + 8, player_y, 100)
+      line!(player_x, player_y - 8, player_x, player_y + 8, 100)
+    }
+
+    if score > 9 {
+      text!(60, 106, "GOOD", 180)
+    }
+
+    if score <= 9 {
+      text!(42, 106, "CLICK OR ARROWS", 110)
+    }
+  }
+}

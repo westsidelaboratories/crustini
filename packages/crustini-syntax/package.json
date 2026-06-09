@@ -4,9 +4,13 @@
   "description": "Permanent syntax highlighting kit for Crustini .flour files.",
   "type": "module",
   "sideEffects": false,
+  "scripts": {
+    "build:browser": "bun scripts/build-browser.ts"
+  },
   "exports": {
     ".": "./src/html.ts",
     "./tokenizer": "./src/crs-tokenizer.ts",
+    "./browser": "./src/browser.ts",
     "./codemirror": "./src/codemirror.ts",
     "./prism": "./src/prism.ts",
     "./highlightjs": "./src/highlightjs.ts",

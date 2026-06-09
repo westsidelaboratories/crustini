@@ -1,0 +1,14 @@
+project!:
+  name "hello-world"
+  version "0.1.0"
+
+screen!:
+  size 180, 120
+  fps 30
+
+preview!:
+  title "Hello World"
+  scale auto
+
+build!:
+  generated ".crustini/generated"

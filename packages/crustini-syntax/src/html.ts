@@ -33,7 +33,7 @@ export function renderCrsTokens(tokens: CrsToken[]): string {
 }
 
 export function highlightCrsToHtml(source: string, lineNumbers = false): string {
-  const lines = tokenizeCrs(source);
+  const lines = tokenizeCrs(source.replace(/\r\n/g, "\n"));
 
   if (!lineNumbers) {
     return lines.map(renderCrsTokens).join("\n");

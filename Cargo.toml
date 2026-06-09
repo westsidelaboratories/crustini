@@ -1,7 +1,10 @@
 [workspace]
 members = [
   "crates/crustini",
-  "crates/crustini-core"
+  "crates/crustini-lang",
+  "crates/crustini-core",
+  "crates/crustini-host",
+  "crates/crustini-web-host"
 ]
 resolver = "2"
 

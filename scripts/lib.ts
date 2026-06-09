@@ -3,14 +3,22 @@ export type Command = {
   label?: string;
 };
 
-export const examples = [
-  "examples/all-macros/app.flour",
-  "examples/bounce/app.flour",
-  "examples/counter/app.flour",
+export const exampleApps = [
+  "examples/hello-world",
+  "examples/brick-breaker/app.flour",
+  "examples/brick-breaker-plus/app.flour",
+  "examples/mouse-orbit/app.flour",
+  "examples/dodge-dots/app.flour",
 ] as const;
 
-export const projectExamples = [
-  "examples/hood-wars",
+export const fixtureApps = [
+  "fixtures/apps/all-macros/app.flour",
+  "fixtures/apps/bounce/app.flour",
+  "fixtures/apps/counter/app.flour",
+] as const;
+
+export const fixtureProjects = [
+  "fixtures/projects/hood-wars",
 ] as const;
 
 export async function run(command: Command): Promise<void> {

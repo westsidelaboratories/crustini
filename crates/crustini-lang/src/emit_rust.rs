@@ -1,3 +1,4 @@
+use crate::macros::{input, screen::ScreenMacro};
 use crate::model::{App, Stmt};
 
 pub fn emit_rust(app: &App) -> String {
@@ -142,29 +143,23 @@ fn emit_stmt(
                 .collect();
             let args = args.join(", ");
 
-            if screen_available && is_screen_call(name) {
-                let rust_name = screen_method_name(name);
-                pushln(out, &format!("{}screen.{}({});", pad, rust_name, args));
+            if screen_available {
+                if let Some(screen_macro) = ScreenMacro::parse(name) {
+                    pushln(
+                        out,
+                        &format!("{}screen.{}({});", pad, screen_macro.rust_method(), args),
+                    );
+                } else {
+                    // Unknown calls intentionally lower to a method call.
+                    // This keeps the compiler simple and lets Rust produce the final error.
+                    pushln(out, &format!("{}self.{}({});", pad, name, args));
+                }
             } else {
                 // Unknown calls intentionally lower to a method call.
                 // This keeps the compiler simple and lets Rust produce the final error.
                 pushln(out, &format!("{}self.{}({});", pad, name, args));
             }
         }
-    }
-}
-
-fn is_screen_call(name: &str) -> bool {
-    matches!(
-        name,
-        "clear" | "pixel" | "set" | "rect" | "circle" | "line" | "text"
-    )
-}
-
-fn screen_method_name(name: &str) -> &str {
-    match name {
-        "pixel" => "set",
-        other => other,
     }
 }
 
@@ -175,7 +170,11 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
 
     while i < bytes.len() {
         let b = bytes[i];
-        if is_ident_start(b) {
+        if b == b'"' || b == b'\'' {
+            let (literal, next) = read_quoted_literal(src, i, b);
+            out.push_str(literal);
+            i = next;
+        } else if is_ident_start(b) {
             let start = i;
             i += 1;
             while i < bytes.len() && is_ident_continue(bytes[i]) {
@@ -190,9 +189,10 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
             } else if contains_ident(state_names, ident) {
                 out.push_str("self.");
                 out.push_str(ident);
-            } else if input_available && is_input_ident(ident) {
+            } else if let Some(field) = input_available.then(|| input::field_name(ident)).flatten()
+            {
                 out.push_str("input.");
-                out.push_str(ident);
+                out.push_str(field);
             } else {
                 out.push_str(ident);
             }
@@ -205,12 +205,29 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
     out
 }
 
-fn contains_ident(items: &[String], ident: &str) -> bool {
-    items.iter().any(|item| item == ident)
+fn read_quoted_literal(src: &str, start: usize, quote: u8) -> (&str, usize) {
+    let bytes = src.as_bytes();
+    let mut i = start + 1;
+    let mut escaped = false;
+
+    while i < bytes.len() {
+        let b = bytes[i];
+        if escaped {
+            escaped = false;
+        } else if b == b'\\' {
+            escaped = true;
+        } else if b == quote {
+            i += 1;
+            return (&src[start..i], i);
+        }
+        i += 1;
+    }
+
+    (&src[start..], bytes.len())
 }
 
-fn is_input_ident(ident: &str) -> bool {
-    matches!(ident, "up" | "down" | "left" | "right" | "a" | "b")
+fn contains_ident(items: &[String], ident: &str) -> bool {
+    items.iter().any(|item| item == ident)
 }
 
 fn stmts_use_input(stmts: &[Stmt]) -> bool {
@@ -239,7 +256,7 @@ fn expr_uses_input(src: &str) -> bool {
 
             let ident = &src[start..i];
             let prev_is_dot = start > 0 && bytes[start - 1] == b'.';
-            if !prev_is_dot && is_input_ident(ident) {
+            if !prev_is_dot && input::field_name(ident).is_some() {
                 return true;
             }
         } else {

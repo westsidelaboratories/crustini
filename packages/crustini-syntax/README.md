@@ -32,7 +32,7 @@ The TextMate grammar powers VS Code and Shiki-style renderers.
 <link rel="stylesheet" href="/themes/crustini-dark.css" />
 <script src="/dist/crustini-highlight.js"></script>
 
-<pre class="crs-code"><code class="language-crs">app! {
+<pre class="crs-code"><code class="language-flour">app! {
   screen!(240, 135)
   fps!(30)
 
@@ -50,6 +50,14 @@ The TextMate grammar powers VS Code and Shiki-style renderers.
   CrustiniHighlight.highlightAll({ lineNumbers: true });
 </script>
 ```
+
+Rebuild the standalone script after changing tokenizer or browser behavior:
+
+```sh
+bun --filter @crustini/syntax build:browser
+```
+
+That writes `dist/crustini-highlight.js` and syncs the static copy used by the site live editor.
 
 ## CodeMirror usage
 
@@ -107,7 +115,7 @@ When the `.flour` migration reaches syntax tooling, add `source.flour` while kee
 
 ## Syntax classes
 
-The standalone HTML highlighter emits:
+The standalone HTML highlighter scans `language-flour`, `language-crustini`, and old `language-crs` blocks. It emits:
 
 ```txt
 .crs-macro

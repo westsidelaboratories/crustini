@@ -23,6 +23,10 @@ buttons!:
   b
   start
 
+preview!:
+  title "Hood Wars"
+  scale auto
+
 assets!:
   map "assets/world.map"
 

@@ -76,7 +76,7 @@ rx bake app.flour
 In this repo during development:
 
 ```bash
-cargo run --bin rx -- bake examples/bounce/app.flour
+cargo run --bin rx -- bake fixtures/apps/bounce/app.flour
 ```
 
 A bake currently:
@@ -115,7 +115,7 @@ It contains generated Rust, generated manifests, lockfiles, Cargo output, and ot
 Example:
 
 ```txt
-examples/bounce/
+fixtures/apps/bounce/
   app.flour
   .bakery/
     Cargo.toml

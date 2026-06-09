@@ -15,6 +15,8 @@ pub struct ProjectConfig {
     pub optimize: String,
     pub panic: String,
     pub generated: PathBuf,
+    pub preview_title: Option<String>,
+    pub preview_scale: String,
     pub assets: Vec<AssetConfig>,
     pub has_recipe: bool,
 }
@@ -45,6 +47,8 @@ impl ProjectConfig {
             optimize: "size".to_string(),
             panic: "abort".to_string(),
             generated: PathBuf::from(".crustini/generated"),
+            preview_title: None,
+            preview_scale: "auto".to_string(),
             assets: Vec::new(),
             has_recipe: false,
         }
@@ -102,6 +106,7 @@ fn parse_recipe(src: &str, path: &Path, config: &mut ProjectConfig) -> Result<()
             "screen" => parse_screen_item(key, rest, config, path, line_no, trimmed)?,
             "memory" => parse_memory_item(key, rest, config, path, line_no, trimmed)?,
             "buttons" => parse_buttons_item(key, rest, path, line_no, trimmed)?,
+            "preview" => parse_preview_item(key, rest, config, path, line_no, trimmed)?,
             "assets" => parse_assets_item(key, rest, config, path, line_no, trimmed)?,
             "build" => parse_build_item(key, rest, config, path, line_no, trimmed)?,
             _ => unreachable!(),
@@ -113,12 +118,13 @@ fn parse_recipe(src: &str, path: &Path, config: &mut ProjectConfig) -> Result<()
 
 fn validate_block(block: &str, path: &Path, line_no: usize) -> Result<(), String> {
     match block {
-        "project" | "target" | "screen" | "memory" | "buttons" | "assets" | "build" => Ok(()),
+        "project" | "target" | "screen" | "memory" | "buttons" | "preview" | "assets"
+        | "build" => Ok(()),
         _ => Err(config_err(
             path,
             line_no,
             block,
-            "unknown config block; use project!, target!, screen!, memory!, buttons!, assets!, or build!",
+            "unknown config block; use project!, target!, screen!, memory!, buttons!, preview!, assets!, or build!",
         )),
     }
 }
@@ -261,6 +267,22 @@ fn parse_assets_item(
     Ok(())
 }
 
+fn parse_preview_item(
+    key: &str,
+    rest: &str,
+    config: &mut ProjectConfig,
+    path: &Path,
+    line_no: usize,
+    line: &str,
+) -> Result<(), String> {
+    match key {
+        "title" => config.preview_title = Some(string_value(rest, path, line_no, line)?),
+        "scale" => config.preview_scale = scale_value(rest, path, line_no, line)?.to_string(),
+        _ => return Err(unknown_key(path, line_no, line, "preview", "title, scale")),
+    }
+    Ok(())
+}
+
 fn parse_build_item(
     key: &str,
     rest: &str,
@@ -334,6 +356,16 @@ fn validate_config(config: &ProjectConfig) -> Result<(), String> {
         return Err("fps must be greater than zero".to_string());
     }
 
+    match config.preview_scale.as_str() {
+        "auto" | "1x" | "2x" | "4x" | "8x" => {}
+        other => {
+            return Err(format!(
+                "preview scale must be `auto`, `1x`, `2x`, `4x`, or `8x`, got `{}`",
+                other
+            ))
+        }
+    }
+
     Ok(())
 }
 
@@ -361,6 +393,24 @@ fn ident_value<'a>(
         Ok(rest)
     } else {
         Err(config_err(path, line_no, line, "expected an identifier"))
+    }
+}
+
+fn scale_value<'a>(
+    rest: &'a str,
+    path: &Path,
+    line_no: usize,
+    line: &str,
+) -> Result<&'a str, String> {
+    let rest = rest.trim();
+    match rest {
+        "auto" | "1x" | "2x" | "4x" | "8x" => Ok(rest),
+        _ => Err(config_err(
+            path,
+            line_no,
+            line,
+            "expected `auto`, `1x`, `2x`, `4x`, or `8x`",
+        )),
     }
 }
 

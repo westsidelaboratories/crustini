@@ -5,6 +5,8 @@ app! {
   state! {
     x: i16 = 12
     y: i16 = 12
+    cursor_x: i16 = 0
+    cursor_y: i16 = 0
     shade: u8 = 180
   }
 
@@ -25,6 +27,20 @@ app! {
     if a {
       shade = 255
     }
+
+    if b {
+      shade = 120
+    }
+
+    if start {
+      x = 12
+      y = 12
+    }
+
+    if mouse_down {
+      cursor_x = mouse_x
+      cursor_y = mouse_y
+    }
   }
 
   draw! {
@@ -32,6 +48,7 @@ app! {
     set!(2, 2, 80)
     pixel!(3, 2, 120)
     rect!(x, y, 16, 10, shade)
+    rect!(cursor_x, cursor_y, 4, 4, 255)
     circle!(64, 32, 8, 200)
     line!(0, 63, 127, 0, 160)
     text!(8, 8, "BASIC MACROS", 255)

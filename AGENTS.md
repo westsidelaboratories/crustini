@@ -14,7 +14,7 @@ Crustini uses a small baking-themed vocabulary. Use these names in new notes, do
 | `proof` | Check/validate source without writing a bakery or building. | Current CLI command is `rx proof`; `check` is a compatibility alias. |
 | `bake` | Compile/build action. Turns source into generated Rust and then an artifact. | Current CLI command is `rx bake`; `build` is a compatibility alias. |
 | `bakery` | Build cache, generated target directory, and intermediate workspace. | Current generated directory is `.bakery/`. |
-| `starter` | Project template or scaffolded starting point. | Current examples are under `examples/`. |
+| `starter` | Project template or scaffolded starting point. | Real runnable apps are under `examples/`; compiler fixtures are under `fixtures/`. |
 
 ## Documentation Rules
 
@@ -39,8 +39,12 @@ Crustini uses a small baking-themed vocabulary. Use these names in new notes, do
 - `README.md` is the short orientation.
 - `docs/toolchain-vocabulary.md` is the dense naming and lifecycle document.
 - `notes.txt` is the scratchpad for compact design principles.
-- `crates/crustini` contains the host compiler and CLI.
+- `crates/crustini` contains the `rx` CLI, project config, bakery writing, and Cargo orchestration.
+- `crates/crustini-lang` contains the `.flour` parser, app model, and generated Rust emitter.
 - `crates/crustini-core` contains the `#![no_std]` runtime surface used by generated apps.
+- `crates/crustini-host` contains native std preview host code for easy-mode `rx run`.
+- `crates/crustini-web-host` contains the parked browser preview host experiment and is not wired to `rx`.
 - `packages/crustini-syntax` contains shared syntax-highlighting assets.
 - `apps/site` contains the Astro website and docs tooling.
-- `examples` contains source fixtures and generated test projects.
+- `examples` contains real runnable app examples; currently `examples/brick-breaker`.
+- `fixtures` contains compiler and CLI source fixtures.

@@ -37,5 +37,6 @@ for (const path of rootPaths) {
 
 for (const dirname of nestedDirs) {
   await removeNested("examples", dirname);
+  await removeNested("fixtures/apps", dirname);
+  await removeNested("fixtures/projects", dirname);
 }
-

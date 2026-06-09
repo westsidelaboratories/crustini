@@ -1,0 +1,99 @@
+app! {
+  screen!(160, 90)
+  fps!(30)
+
+  state! {
+    paddle_x: i16 = 64
+    ball_x: i16 = 80
+    ball_y: i16 = 68
+    ball_vx: i16 = 1
+    ball_vy: i16 = -1
+    running: bool = false
+    brick_alive: bool = true
+  }
+
+  update! {
+    if left {
+      paddle_x = paddle_x - 3
+    }
+
+    if right {
+      paddle_x = paddle_x + 3
+    }
+
+    if paddle_x < 0 {
+      paddle_x = 0
+    }
+
+    if paddle_x > 128 {
+      paddle_x = 128
+    }
+
+    if mouse_down {
+      running = true
+    }
+
+    if running {
+      ball_x = ball_x + ball_vx
+      ball_y = ball_y + ball_vy
+
+      if ball_x < 2 {
+        ball_vx = 1
+      }
+
+      if ball_x > 157 {
+        ball_vx = -1
+      }
+
+      if ball_y < 2 {
+        ball_vy = 1
+      }
+
+      if ball_y >= 72 && ball_y <= 78 && ball_x >= paddle_x && ball_x <= paddle_x + 32 {
+        ball_vy = -1
+      }
+
+      if brick_alive && ball_x >= 48 && ball_x <= 112 && ball_y >= 22 && ball_y <= 34 {
+        brick_alive = false
+        ball_vy = 1
+      }
+
+      if ball_y > 88 {
+        running = false
+        brick_alive = true
+        paddle_x = 64
+        ball_x = 80
+        ball_y = 68
+        ball_vx = 1
+        ball_vy = -1
+      }
+    }
+
+    if running == false {
+      ball_x = paddle_x + 16
+      ball_y = 68
+    }
+  }
+
+  draw! {
+    clear!(6)
+    text!(38, 4, "BRICK BREAKER", 220)
+    line!(0, 14, 159, 14, 60)
+
+    if brick_alive {
+      rect!(48, 24, 64, 10, 200)
+    }
+
+    rect!(paddle_x, 76, 32, 5, 240)
+    rect!(ball_x - 2, ball_y - 2, 4, 4, 255)
+
+    if running == false {
+      text!(34, 46, "CLICK TO START", 180)
+      text!(38, 56, "ARROWS MOVE", 120)
+    }
+
+    if brick_alive == false {
+      text!(58, 32, "NICE!", 255)
+    }
+  }
+}
