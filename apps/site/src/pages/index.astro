@@ -33,6 +33,10 @@ const example = `app! {
     circle!(x, y, 8, 255)
   }
 }`;
+
+const miniExample = `rx starter brick-breaker my-game
+rx proof my-game/src/main.flour
+rx bake my-game/src/main.flour`;
 ---
 
 <!doctype html>
@@ -40,16 +44,19 @@ const example = `app! {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Crustini is a tiny app syntax that bakes into no_std Rust." />
-    <title>Crustini</title>
+    <meta name="description" content="Crustini is a tiny .flour language for playful apps that bakes into no_std Rust." />
+    <title>Crustini - a tiny .flour language</title>
   </head>
   <body>
     <header class="topbar">
       <div class="shell topbar-inner">
-        <a class="brand" href="/">Crustini</a>
+        <a class="brand" href="/" aria-label="Crustini home">
+          <span class="brand-mark">rx</span>
+          <span>Crustini</span>
+        </a>
         <nav class="nav" aria-label="Main">
-          <a href="#build">Build</a>
-          <a href="#workspace">Workspace</a>
+          <a href="#language">Language</a>
+          <a href="#bake">Bake</a>
           <a href="/live/">Docs Live</a>
         </nav>
       </div>
@@ -58,58 +65,87 @@ const example = `app! {
     <main>
       <section class="hero">
         <div class="shell hero-grid">
-          <div>
+          <div class="hero-copy">
+            <p class="eyebrow">tiny source language for playful apps</p>
             <h1>Crustini</h1>
-            <p class="lede">Tiny <code>.flour</code> app syntax that bakes into boring <code>#![no_std]</code> Rust for small-device UI experiments.</p>
+            <p class="lede">Write crisp <code>.flour</code> scripts for little games, toys, and tiny-screen experiments. Run them with <code>rx</code>, then bake them into boring <code>#![no_std]</code> Rust when it is time to ship.</p>
             <div class="actions">
-              <a class="button primary" href="#build">Build the example</a>
+              <a class="button primary" href="#bake">Bake a starter</a>
               <a class="button" href="/live/">Open Docs Live</a>
+            </div>
+            <div class="quick-strip" aria-label="Crustini language traits">
+              <span>.flour files</span>
+              <span>fixed update/draw loop</span>
+              <span>no Rust ceremony</span>
             </div>
           </div>
 
           <div class="code-frame" aria-label="Crustini source example">
             <div class="code-label">
-              <span>fixtures/apps/bounce/app.flour</span>
-              <span>.flour</span>
+              <span>src/main.flour</span>
+              <strong>live language shape</strong>
             </div>
             <Fragment set:html={renderCrsBlock(example)} />
           </div>
         </div>
       </section>
 
-      <section id="build" class="section">
-        <div class="shell">
-          <h2>Build</h2>
-          <p>A bake emits a generated Rust crate into the bakery, then Cargo builds that crate against <code>crustini-core</code>. The current bakery directory is <code>.bakery/</code>, with <code>build</code> kept as a compatibility alias.</p>
-          <div class="commands" aria-label="Build commands">
-            <code>cargo run --bin rx -- starter hello my-hello</code>
-            <code>cargo run --bin rx -- starters</code>
-            <code>cargo run --bin rx -- proof my-hello/app.flour</code>
-            <code>cargo run --bin rx -- bake my-hello/app.flour</code>
-            <code>cargo run --bin rx -- emit fixtures/apps/bounce/app.flour</code>
+      <section id="language" class="section section-hot">
+        <div class="shell split">
+          <div>
+            <p class="eyebrow">language first</p>
+            <h2>Small syntax. Fast loops. Actual pixels.</h2>
+            <p>Crustini is not trying to hide a giant app stack behind cute names. A <code>.flour</code> file says what the screen is, what state exists, how <code>update</code> mutates it, and how <code>draw</code> paints it.</p>
+          </div>
+          <div class="language-list" aria-label="Language highlights">
+            <div><strong>Macro-shaped</strong><span>Simple blocks that stay easy to scan.</span></div>
+            <div><strong>Game-loop native</strong><span><code>setup</code>, <code>update</code>, and <code>draw</code> are the main moves.</span></div>
+            <div><strong>Embedded headed</strong><span>Generated Rust moves toward fixed pools, handles, and no default heap.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bake" class="section">
+        <div class="shell bake-grid">
+          <div>
+            <p class="eyebrow">rx bake</p>
+            <h2>From starter to artifact without killing the vibe.</h2>
+            <p>A bake writes generated Rust into the bakery, then Cargo builds it against <code>crustini-core</code>. Use <code>proof</code> when you only want diagnostics, and <code>bake</code> when you want the artifact.</p>
+          </div>
+          <div class="terminal" aria-label="Build commands">
+            {miniExample.split("\n").map((line) => <code><span>$</span>{line}</code>)}
           </div>
         </div>
       </section>
 
       <section id="workspace" class="section">
         <div class="shell">
-          <h2>Workspace</h2>
+          <p class="eyebrow">what is inside</p>
+          <h2>The bakery is small on purpose.</h2>
           <div class="grid">
             <article class="tile">
-              <h3>Rust crates</h3>
-              <p><code>crates/crustini</code> contains the host compiler and CLI. <code>crates/crustini-core</code> contains the no_std runtime surface.</p>
+              <h3>rx CLI</h3>
+              <p><code>crates/crustini</code> owns starters, project config, bakery writing, and Cargo orchestration.</p>
             </article>
             <article class="tile">
-              <h3>Shared packages</h3>
-              <p><code>packages/crustini-syntax</code> provides tokenizer, HTML, Prism, Highlight.js, CodeMirror, grammar, and theme assets.</p>
+              <h3>.flour language</h3>
+              <p><code>crates/crustini-lang</code> parses the source app model and emits generated Rust.</p>
             </article>
             <article class="tile">
-              <h3>Apps</h3>
-              <p><code>apps/site</code> is the Astro site. Real apps live in <code>examples/</code>; compiler fixtures live in <code>fixtures/</code>.</p>
+              <h3>Runtime surface</h3>
+              <p><code>crates/crustini-core</code> keeps the generated app API tiny and <code>#![no_std]</code>.</p>
             </article>
             <article class="tile">
-              <h3>Vocabulary</h3>
-              <p><code>.flour</code> source is baked in a <code>.bakery/</code> workspace to produce a normal artifact. Starters are project templates.</p>
+              <h3>Starters</h3>
+              <p>Real runnable apps live in <code>examples/</code>; compiler fixtures stay in <code>fixtures/</code>.</p>
+            </article>
+            <article class="tile accent-tile">
+              <h3>Docs Live</h3>
+              <p>Draft language notes with highlighted <code>flour</code> blocks and copy the preview HTML.</p>
+            </article>
+            <article class="tile">
+              <h3>Compatibility</h3>
+              <p><code>build</code> and <code>.crst</code> still exist as old aliases, but new copy should say <code>bake</code> and <code>.flour</code>.</p>
             </article>
           </div>
         </div>
