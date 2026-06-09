@@ -1,8 +1,8 @@
 # Brick Breaker Plus
 
-This is a larger 4:3 Brick Breaker example written fully in Crustini source.
+This is a larger Brick Breaker example written fully in Crustini source.
 
-It is intentionally still small enough that you can read the whole source and then inspect the generated Rust.
+It uses a `320x240` screen, 18 bricks, lives, win/loss states, mouse control, keyboard control, and the crude helper verbs that lower to Rust runtime functions.
 
 ## Authored Files
 
@@ -40,10 +40,10 @@ Controls:
 `app.flour` contains:
 
 ```txt
-screen!(240, 180)
-fps!(45)
+screen!(320, 240)
+fps!(50)
 state! { paddle, ball, mode, lives, score, flash, bricks }
-update! { input, movement, paddle collision, brick collision, win/loss }
+update! { input, movement, clamp!, hit_rect!, abs!, win/loss }
 draw! { background, header, lives, bricks, walls, paddle, ball, text }
 ```
 
@@ -71,46 +71,58 @@ That generated crate contains:
 Concrete examples:
 
 ```rust
-screen!(240, 180)
-fps!(45)
+screen!(320, 240)
+fps!(50)
 ```
 
 compiles to:
 
 ```rust
-pub const WIDTH: usize = 240;
-pub const HEIGHT: usize = 180;
-pub const FPS: usize = 45;
+pub const WIDTH: usize = 320;
+pub const HEIGHT: usize = 240;
+pub const FPS: usize = 50;
 ```
 
 This source:
 
 ```rust
-if left {
-  paddle_x = paddle_x - 4
+paddle_x = clamp!(paddle_x, 8, 260)
+```
+
+compiles to:
+
+```rust
+self.paddle_x = crustini_core::clamp_i16(self.paddle_x, 8, 260);
+```
+
+This source:
+
+```rust
+if hit_rect!(ball_x - 3, ball_y - 3, 6, 6, paddle_x, 202, 52, 7) {
+  ball_vy = 0 - abs!(ball_vy)
 }
 ```
 
 compiles to:
 
 ```rust
-if input.left {
-    self.paddle_x = self.paddle_x - 4;
+if crustini_core::hit_rect(self.ball_x - 3, self.ball_y - 3, 6, 6, self.paddle_x, 202, 52, 7) {
+    self.ball_vy = 0 - crustini_core::abs_i16(self.ball_vy);
 }
 ```
 
 This source:
 
 ```rust
-rect!(paddle_x, 154, 44, 5, 245)
-circle!(ball_x, ball_y, 3, 255)
+rect!(paddle_x, 202, 52, 7, 245)
+circle!(ball_x, ball_y, 4, 255)
 ```
 
 compiles to:
 
 ```rust
-screen.rect(self.paddle_x, 154, 44, 5, 245);
-screen.circle(self.ball_x, self.ball_y, 3, 255);
+screen.rect(self.paddle_x, 202, 52, 7, 245);
+screen.circle(self.ball_x, self.ball_y, 4, 255);
 ```
 
 Layer 2 is the host/binary layer:

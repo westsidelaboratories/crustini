@@ -205,6 +205,11 @@ Current basic macro set:
 | `circle!(X, Y, R, COLOR)` | setup/draw | Filled circle. |
 | `line!(X0, Y0, X1, Y1, COLOR)` | setup/draw | Line. |
 | `text!(X, Y, "TEXT", COLOR)` | setup/draw | Tiny bitmap text. |
+| `clamp!(VALUE, MIN, MAX)` | expressions | Lowers to `crustini_core::clamp_i16`. |
+| `hit_rect!(AX, AY, AW, AH, BX, BY, BW, BH)` | expressions | Axis-aligned rectangle collision. |
+| `abs!(VALUE)` | expressions | Lowers to `crustini_core::abs_i16`. |
+| `min!(A, B)` | expressions | Lowers to `core::cmp::min`. |
+| `max!(A, B)` | expressions | Lowers to `core::cmp::max`. |
 
 Current basic input names are available in `update!`:
 
@@ -339,13 +344,18 @@ app! {
 
   update! {
     x = x + vx
+    x = clamp!(x, 8, 232)
 
-    if x > 232 {
+    if hit_rect!(x - 8, y - 8, 16, 16, 220, 48, 12, 12) {
       vx = -1
     }
 
-    if x < 8 {
-      vx = 1
+    if x == 8 {
+      vx = abs!(vx)
+    }
+
+    if x == 232 {
+      vx = 0 - abs!(vx)
     }
   }
 

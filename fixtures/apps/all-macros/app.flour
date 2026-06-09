@@ -8,6 +8,7 @@ app! {
     cursor_x: i16 = 0
     cursor_y: i16 = 0
     shade: u8 = 180
+    marker: bool = false
   }
 
   setup! {
@@ -41,6 +42,13 @@ app! {
       cursor_x = mouse_x
       cursor_y = mouse_y
     }
+
+    x = clamp!(x, 0, 112)
+    y = max!(0, min!(y, 54))
+
+    if hit_rect!(x, y, 16, 10, cursor_x, cursor_y, 4, 4) {
+      marker = true
+    }
   }
 
   draw! {
@@ -49,8 +57,13 @@ app! {
     pixel!(3, 2, 120)
     rect!(x, y, 16, 10, shade)
     rect!(cursor_x, cursor_y, 4, 4, 255)
+    rect!(abs!(x - cursor_x), 48, 4, 4, 90)
     circle!(64, 32, 8, 200)
     line!(0, 63, 127, 0, 160)
     text!(8, 8, "BASIC MACROS", 255)
+
+    if marker {
+      text!(8, 20, "HIT", 255)
+    }
   }
 }

@@ -1,4 +1,4 @@
-use crate::macros::{input, screen::ScreenMacro};
+use crate::macros::{input, screen::ScreenMacro, verb::VerbMacro};
 use crate::model::{App, Stmt};
 
 pub fn emit_rust(app: &App) -> String {
@@ -186,6 +186,15 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
 
             if prev_is_dot {
                 out.push_str(ident);
+            } else if i < bytes.len() && bytes[i] == b'!' {
+                if let Some(verb_macro) = VerbMacro::parse(ident) {
+                    out.push_str(verb_macro.spec().rust_path);
+                    i += 1;
+                } else {
+                    out.push_str(ident);
+                    out.push('!');
+                    i += 1;
+                }
             } else if contains_ident(state_names, ident) {
                 out.push_str("self.");
                 out.push_str(ident);

@@ -72,9 +72,9 @@ Then it emits Rust shaped like this:
 
 use crustini_core::{Buttons, CrustiniApp, Screen};
 
-pub const WIDTH: usize = 240;
-pub const HEIGHT: usize = 180;
-pub const FPS: usize = 45;
+pub const WIDTH: usize = 320;
+pub const HEIGHT: usize = 240;
+pub const FPS: usize = 50;
 
 pub struct App {
     pub paddle_x: i16,
@@ -85,9 +85,9 @@ pub struct App {
 impl App {
     pub const fn new() -> Self {
         Self {
-            paddle_x: 96,
-            ball_x: 120,
-            ball_y: 142,
+            paddle_x: 132,
+            ball_x: 160,
+            ball_y: 188,
         }
     }
 }
@@ -95,13 +95,13 @@ impl App {
 impl CrustiniApp for App {
     fn update(&mut self, input: Buttons) {
         if input.left {
-            self.paddle_x = self.paddle_x - 4;
+            self.paddle_x = self.paddle_x - 5;
         }
     }
 
     fn draw(&self, screen: &mut Screen<'_>) {
         screen.clear(5);
-        screen.rect(self.paddle_x, 154, 44, 5, 245);
+        screen.rect(self.paddle_x, 202, 52, 7, 245);
     }
 }
 ```
@@ -113,23 +113,23 @@ That snippet is shortened for readability. The actual generated file contains ev
 Screen and frame rate:
 
 ```rust
-screen!(240, 180)
-fps!(45)
+screen!(320, 240)
+fps!(50)
 ```
 
 becomes:
 
 ```rust
-pub const WIDTH: usize = 240;
-pub const HEIGHT: usize = 180;
-pub const FPS: usize = 45;
+pub const WIDTH: usize = 320;
+pub const HEIGHT: usize = 240;
+pub const FPS: usize = 50;
 ```
 
 State:
 
 ```rust
 state! {
-  paddle_x: i16 = 96
+  paddle_x: i16 = 132
   score: u32 = 0
 }
 ```
@@ -145,7 +145,7 @@ pub struct App {
 impl App {
     pub const fn new() -> Self {
         Self {
-            paddle_x: 96,
+            paddle_x: 132,
             score: 0,
         }
     }
@@ -156,7 +156,7 @@ Input:
 
 ```rust
 if left {
-  paddle_x = paddle_x - 4
+  paddle_x = paddle_x - 5
 }
 ```
 
@@ -164,22 +164,42 @@ becomes:
 
 ```rust
 if input.left {
-    self.paddle_x = self.paddle_x - 4;
+    self.paddle_x = self.paddle_x - 5;
+}
+```
+
+Helper verbs:
+
+```rust
+paddle_x = clamp!(paddle_x, 8, 260)
+
+if hit_rect!(ball_x - 3, ball_y - 3, 6, 6, paddle_x, 202, 52, 7) {
+  ball_vy = 0 - abs!(ball_vy)
+}
+```
+
+becomes:
+
+```rust
+self.paddle_x = crustini_core::clamp_i16(self.paddle_x, 8, 260);
+
+if crustini_core::hit_rect(self.ball_x - 3, self.ball_y - 3, 6, 6, self.paddle_x, 202, 52, 7) {
+    self.ball_vy = 0 - crustini_core::abs_i16(self.ball_vy);
 }
 ```
 
 Drawing:
 
 ```rust
-rect!(paddle_x, 154, 44, 5, 245)
-circle!(ball_x, ball_y, 3, 255)
+rect!(paddle_x, 202, 52, 7, 245)
+circle!(ball_x, ball_y, 4, 255)
 ```
 
 becomes:
 
 ```rust
-screen.rect(self.paddle_x, 154, 44, 5, 245);
-screen.circle(self.ball_x, self.ball_y, 3, 255);
+screen.rect(self.paddle_x, 202, 52, 7, 245);
+screen.circle(self.ball_x, self.ball_y, 4, 255);
 ```
 
 The generated app depends on `crustini-core`, not on the native window host.

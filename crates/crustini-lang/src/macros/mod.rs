@@ -2,6 +2,7 @@ pub mod app;
 pub mod block;
 pub mod input;
 pub mod screen;
+pub mod verb;
 
 #[cfg(test)]
 mod tests {
@@ -9,6 +10,7 @@ mod tests {
     use super::block::{BlockMacro, BLOCK_MACROS};
     use super::input::{field_name, INPUT_NAMES};
     use super::screen::{ScreenArgs, ScreenMacro, SCREEN_MACROS};
+    use super::verb::{VerbArgs, VerbMacro, VERB_MACROS};
     use std::collections::HashSet;
 
     #[test]
@@ -65,6 +67,20 @@ mod tests {
         assert_eq!(field_name("mousex"), Some("mouse_x"));
         assert_eq!(field_name("mousey"), Some("mouse_y"));
         assert_eq!(field_name("mousedown"), Some("mouse_down"));
+    }
+
+    #[test]
+    fn verb_macro_registry_has_lowering_metadata() {
+        assert_unique(VERB_MACROS.iter().map(|spec| spec.name));
+
+        for spec in VERB_MACROS {
+            assert_eq!(VerbMacro::parse(spec.name), Some(spec.kind));
+            assert_eq!(spec.kind.spec(), spec);
+        }
+
+        let hit_rect = VerbMacro::parse("hit_rect").unwrap();
+        assert_eq!(hit_rect.spec().rust_path, "crustini_core::hit_rect");
+        assert_eq!(hit_rect.spec().args, VerbArgs::Exact(8));
     }
 
     fn assert_unique<'a>(items: impl IntoIterator<Item = &'a str>) {

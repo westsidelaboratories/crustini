@@ -76,6 +76,54 @@ mod tests {
     }
 
     #[test]
+    fn verb_macros_lower_to_runtime_helpers() {
+        let rust = compile_to_rust(
+            r#"app! {
+  state! {
+    x: i16 = 10
+    y: i16 = 20
+    hit: bool = false
+  }
+
+  update! {
+    x = clamp!(x + 4, 0, 100)
+    y = abs!(y)
+    if hit_rect!(x, y, 4, 4, 10, 10, 8, 8) {
+      hit = true
+    }
+  }
+
+  draw! {
+    rect!(clamp!(x, 0, 100), y, 4, 4, 255)
+  }
+}
+"#,
+        )
+        .unwrap();
+
+        assert!(rust.contains("self.x = crustini_core::clamp_i16(self.x + 4, 0, 100);"));
+        assert!(rust.contains("self.y = crustini_core::abs_i16(self.y);"));
+        assert!(rust.contains("if crustini_core::hit_rect(self.x, self.y, 4, 4, 10, 10, 8, 8) {"));
+        assert!(rust
+            .contains("screen.rect(crustini_core::clamp_i16(self.x, 0, 100), self.y, 4, 4, 255);"));
+    }
+
+    #[test]
+    fn verb_macros_validate_argument_counts() {
+        let err = compile_to_rust(
+            r#"app! {
+  update! {
+    x = clamp!(1, 2)
+  }
+}
+"#,
+        )
+        .unwrap_err();
+
+        assert!(err.contains("clamp! expects 3 arguments, got 2"));
+    }
+
+    #[test]
     fn basic_input_names_lower_to_buttons_fields() {
         let rust = compile_to_rust(
             r#"app! {

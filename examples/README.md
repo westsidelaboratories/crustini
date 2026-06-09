@@ -36,7 +36,7 @@ bun run check
 | --- | --- | --- | --- |
 | [hello-world](./hello-world/) | Project | `180x120` | `recipe.flour`, starter shape, generated project output. |
 | [brick-breaker](./brick-breaker/) | Single file | `160x90` | The smallest playable brick breaker. |
-| [brick-breaker-plus](./brick-breaker-plus/) | Single file | `240x180` | Bigger 4:3 game and the deepest compile write-up. |
+| [brick-breaker-plus](./brick-breaker-plus/) | Single file | `320x240` | Bigger game using helper verbs and the deepest compile write-up. |
 | [mouse-orbit](./mouse-orbit/) | Single file | `180x120` | Mouse position, click state, simple animation. |
 | [dodge-dots](./dodge-dots/) | Single file | `180x120` | Arrows, mouse input, collision checks, reset state. |
 

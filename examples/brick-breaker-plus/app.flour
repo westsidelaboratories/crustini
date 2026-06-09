@@ -1,11 +1,11 @@
 app! {
-  screen!(240, 180)
-  fps!(45)
+  screen!(320, 240)
+  fps!(50)
 
   state! {
-    paddle_x: i16 = 96
-    ball_x: i16 = 120
-    ball_y: i16 = 142
+    paddle_x: i16 = 132
+    ball_x: i16 = 160
+    ball_y: i16 = 188
     ball_vx: i16 = 2
     ball_vy: i16 = -2
     mode: i16 = 0
@@ -24,36 +24,36 @@ app! {
     b10: bool = true
     b11: bool = true
     b12: bool = true
+    b13: bool = true
+    b14: bool = true
+    b15: bool = true
+    b16: bool = true
+    b17: bool = true
+    b18: bool = true
   }
 
   update! {
     if left {
-      paddle_x = paddle_x - 4
+      paddle_x = paddle_x - 5
     }
 
     if right {
-      paddle_x = paddle_x + 4
+      paddle_x = paddle_x + 5
     }
 
     if mouse_down {
-      paddle_x = mouse_x - 22
+      paddle_x = mouse_x - 26
     }
 
-    if paddle_x < 6 {
-      paddle_x = 6
-    }
-
-    if paddle_x > 190 {
-      paddle_x = 190
-    }
+    paddle_x = clamp!(paddle_x, 8, 260)
 
     if flash > 0 {
       flash = flash - 1
     }
 
     if mode == 0 {
-      ball_x = paddle_x + 22
-      ball_y = 142
+      ball_x = paddle_x + 26
+      ball_y = 188
 
       if mouse_down {
         mode = 1
@@ -72,126 +72,166 @@ app! {
       ball_x = ball_x + ball_vx
       ball_y = ball_y + ball_vy
 
-      if ball_x < 5 {
-        ball_x = 5
-        ball_vx = 2
+      if ball_x < 7 {
+        ball_x = 7
+        ball_vx = abs!(ball_vx)
       }
 
-      if ball_x > 235 {
-        ball_x = 235
-        ball_vx = -2
+      if ball_x > 313 {
+        ball_x = 313
+        ball_vx = 0 - abs!(ball_vx)
       }
 
-      if ball_y < 20 {
-        ball_y = 20
-        ball_vy = 2
+      if ball_y < 26 {
+        ball_y = 26
+        ball_vy = abs!(ball_vy)
       }
 
-      if ball_y >= 149 && ball_y <= 157 && ball_x >= paddle_x && ball_x <= paddle_x + 44 {
-        ball_vy = -2
+      if hit_rect!(ball_x - 3, ball_y - 3, 6, 6, paddle_x, 202, 52, 7) {
+        ball_vy = 0 - abs!(ball_vy)
+
+        if ball_x < paddle_x + 16 {
+          ball_vx = -3
+        }
+
+        if ball_x > paddle_x + 36 {
+          ball_vx = 3
+        }
       }
 
-      if ball_y >= 149 && ball_y <= 157 && ball_x >= paddle_x && ball_x <= paddle_x + 12 {
-        ball_vx = -3
-      }
-
-      if ball_y >= 149 && ball_y <= 157 && ball_x >= paddle_x + 32 && ball_x <= paddle_x + 44 {
-        ball_vx = 3
-      }
-
-      if b01 && ball_x >= 20 && ball_x <= 48 && ball_y >= 36 && ball_y <= 46 {
+      if b01 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 20, 42, 34, 12) {
         b01 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b02 && ball_x >= 52 && ball_x <= 80 && ball_y >= 36 && ball_y <= 46 {
+      if b02 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 58, 42, 34, 12) {
         b02 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b03 && ball_x >= 84 && ball_x <= 112 && ball_y >= 36 && ball_y <= 46 {
+      if b03 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 96, 42, 34, 12) {
         b03 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b04 && ball_x >= 116 && ball_x <= 144 && ball_y >= 36 && ball_y <= 46 {
+      if b04 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 134, 42, 34, 12) {
         b04 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b05 && ball_x >= 148 && ball_x <= 176 && ball_y >= 36 && ball_y <= 46 {
+      if b05 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 172, 42, 34, 12) {
         b05 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b06 && ball_x >= 180 && ball_x <= 208 && ball_y >= 36 && ball_y <= 46 {
+      if b06 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 210, 42, 34, 12) {
         b06 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b07 && ball_x >= 36 && ball_x <= 64 && ball_y >= 52 && ball_y <= 62 {
+      if b07 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 248, 42, 34, 12) {
         b07 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b08 && ball_x >= 68 && ball_x <= 96 && ball_y >= 52 && ball_y <= 62 {
+      if b08 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 39, 60, 34, 12) {
         b08 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b09 && ball_x >= 100 && ball_x <= 128 && ball_y >= 52 && ball_y <= 62 {
+      if b09 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 77, 60, 34, 12) {
         b09 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b10 && ball_x >= 132 && ball_x <= 160 && ball_y >= 52 && ball_y <= 62 {
+      if b10 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 115, 60, 34, 12) {
         b10 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b11 && ball_x >= 164 && ball_x <= 192 && ball_y >= 52 && ball_y <= 62 {
+      if b11 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 153, 60, 34, 12) {
         b11 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if b12 && ball_x >= 196 && ball_x <= 224 && ball_y >= 52 && ball_y <= 62 {
+      if b12 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 191, 60, 34, 12) {
         b12 = false
-        ball_vy = 2
+        ball_vy = abs!(ball_vy)
         score = score + 1
-        flash = 3
+        flash = 4
       }
 
-      if score >= 12 {
+      if b13 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 229, 60, 34, 12) {
+        b13 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if b14 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 20, 78, 34, 12) {
+        b14 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if b15 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 58, 78, 34, 12) {
+        b15 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if b16 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 96, 78, 34, 12) {
+        b16 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if b17 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 134, 78, 34, 12) {
+        b17 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if b18 && hit_rect!(ball_x - 3, ball_y - 3, 6, 6, 172, 78, 34, 12) {
+        b18 = false
+        ball_vy = abs!(ball_vy)
+        score = score + 1
+        flash = 4
+      }
+
+      if score >= 18 {
         mode = 2
-        ball_vx = 2
-        ball_vy = -2
       }
 
-      if ball_y > 178 {
+      if ball_y > 236 {
         lives = lives - 1
-        flash = 8
+        flash = 10
         mode = 0
         ball_vx = -2
         ball_vy = -2
@@ -219,6 +259,12 @@ app! {
         b10 = true
         b11 = true
         b12 = true
+        b13 = true
+        b14 = true
+        b15 = true
+        b16 = true
+        b17 = true
+        b18 = true
       }
     }
 
@@ -239,107 +285,140 @@ app! {
         b10 = true
         b11 = true
         b12 = true
+        b13 = true
+        b14 = true
+        b15 = true
+        b16 = true
+        b17 = true
+        b18 = true
       }
     }
   }
 
   draw! {
-    clear!(5)
-    rect!(0, 0, 240, 18, 18)
-    text!(8, 6, "BRICK BREAKER PLUS", 245)
-    line!(0, 19, 239, 19, 70)
+    clear!(4)
+    rect!(0, 0, 320, 24, 16)
+    text!(10, 8, "BRICK BREAKER PLUS", 245)
+    line!(0, 25, 319, 25, 72)
 
     if lives >= 1 {
-      rect!(196, 6, 6, 6, 190)
+      rect!(266, 8, 8, 8, 210)
     }
 
     if lives >= 2 {
-      rect!(206, 6, 6, 6, 190)
+      rect!(280, 8, 8, 8, 210)
     }
 
     if lives >= 3 {
-      rect!(216, 6, 6, 6, 190)
+      rect!(294, 8, 8, 8, 210)
     }
 
     if flash > 0 {
-      line!(0, 22, 239, 22, 180)
-      line!(0, 24, 239, 24, 100)
+      line!(0, 28, 319, 28, 210)
+      line!(0, 30, 319, 30, 120)
     }
 
+    line!(8, 30, 8, 230, 48)
+    line!(311, 30, 311, 230, 48)
+    line!(8, 230, 311, 230, 34)
+
     if b01 {
-      rect!(20, 36, 28, 10, 220)
+      rect!(20, 42, 34, 12, 230)
     }
 
     if b02 {
-      rect!(52, 36, 28, 10, 205)
+      rect!(58, 42, 34, 12, 214)
     }
 
     if b03 {
-      rect!(84, 36, 28, 10, 190)
+      rect!(96, 42, 34, 12, 198)
     }
 
     if b04 {
-      rect!(116, 36, 28, 10, 220)
+      rect!(134, 42, 34, 12, 230)
     }
 
     if b05 {
-      rect!(148, 36, 28, 10, 205)
+      rect!(172, 42, 34, 12, 214)
     }
 
     if b06 {
-      rect!(180, 36, 28, 10, 190)
+      rect!(210, 42, 34, 12, 198)
     }
 
     if b07 {
-      rect!(36, 52, 28, 10, 175)
+      rect!(248, 42, 34, 12, 230)
     }
 
     if b08 {
-      rect!(68, 52, 28, 10, 160)
+      rect!(39, 60, 34, 12, 180)
     }
 
     if b09 {
-      rect!(100, 52, 28, 10, 145)
+      rect!(77, 60, 34, 12, 164)
     }
 
     if b10 {
-      rect!(132, 52, 28, 10, 175)
+      rect!(115, 60, 34, 12, 148)
     }
 
     if b11 {
-      rect!(164, 52, 28, 10, 160)
+      rect!(153, 60, 34, 12, 180)
     }
 
     if b12 {
-      rect!(196, 52, 28, 10, 145)
+      rect!(191, 60, 34, 12, 164)
     }
 
-    line!(6, 22, 6, 174, 46)
-    line!(233, 22, 233, 174, 46)
-    rect!(paddle_x, 154, 44, 5, 245)
-    circle!(ball_x, ball_y, 3, 255)
+    if b13 {
+      rect!(229, 60, 34, 12, 148)
+    }
+
+    if b14 {
+      rect!(20, 78, 34, 12, 132)
+    }
+
+    if b15 {
+      rect!(58, 78, 34, 12, 118)
+    }
+
+    if b16 {
+      rect!(96, 78, 34, 12, 104)
+    }
+
+    if b17 {
+      rect!(134, 78, 34, 12, 132)
+    }
+
+    if b18 {
+      rect!(172, 78, 34, 12, 118)
+    }
+
+    rect!(paddle_x, 202, 52, 7, 245)
+    rect!(paddle_x + 6, 199, 40, 3, 130)
+    circle!(ball_x, ball_y, 4, 255)
 
     if mode == 0 {
-      text!(58, 96, "CLICK OR A TO START", 200)
-      text!(66, 108, "ARROWS OR MOUSE", 120)
+      text!(82, 132, "CLICK START OR A", 210)
+      text!(86, 146, "ARROWS OR MOUSE", 130)
     }
 
     if mode == 2 {
-      text!(82, 96, "YOU CLEARED IT", 255)
-      text!(70, 108, "CLICK TO REPLAY", 180)
+      text!(112, 132, "BOARD CLEARED", 255)
+      text!(100, 146, "CLICK TO REPLAY", 180)
     }
 
     if mode == 3 {
-      text!(88, 96, "GAME OVER", 255)
-      text!(70, 108, "CLICK TO RETRY", 180)
+      text!(126, 132, "GAME OVER", 255)
+      text!(102, 146, "CLICK TO RETRY", 180)
     }
 
-    if score >= 4 {
-      text!(12, 166, "NICE", 95)
+    if score >= 6 {
+      text!(20, 216, "NICE", 86)
     }
 
-    if score >= 8 {
-      text!(42, 166, "KEEP GOING", 130)
+    if score >= 12 {
+      text!(58, 216, "KEEP GOING", 120)
     }
   }
 }

@@ -1,6 +1,7 @@
 use crate::macros::app::AppMacro;
 use crate::macros::block::BlockMacro;
 use crate::macros::screen::{ScreenArgs, ScreenMacro};
+use crate::macros::verb::{VerbArgs, VerbMacro};
 use crate::model::{App, StateField, Stmt};
 
 struct Line {
@@ -208,6 +209,7 @@ fn parse_braced_stmt_block(body: &str) -> Result<Vec<Stmt>, String> {
             let open = find_next_char(body, after_if, '{')
                 .ok_or_else(|| "if statement missing `{`".to_string())?;
             let cond = body[after_if..open].trim().to_string();
+            validate_expr_macros(&cond)?;
             let close = find_matching_brace(body, open)?;
             let nested = &body[open + 1..close];
             let body = parse_braced_stmt_block(nested)?;
@@ -231,6 +233,7 @@ fn parse_braced_stmt_line(line: &str) -> Result<Stmt, String> {
     if let Some((name, expr)) = assignment(line) {
         let name = name.trim();
         ident(name, "assignment target")?;
+        validate_expr_macros(expr.trim())?;
         return Ok(Stmt::Assign {
             name: name.to_string(),
             expr: expr.trim().to_string(),
@@ -239,6 +242,9 @@ fn parse_braced_stmt_line(line: &str) -> Result<Stmt, String> {
 
     if let Some((name, args)) = parse_paren_call(line)? {
         validate_call_args(&name, args.len())?;
+        for arg in &args {
+            validate_expr_macros(arg)?;
+        }
         return Ok(Stmt::Call { name, args });
     }
 
@@ -265,23 +271,33 @@ fn split_comma_args(src: &str) -> Vec<String> {
     let mut args = Vec::new();
     let mut start = 0usize;
     let mut in_string = false;
+    let mut in_char = false;
     let mut escaped = false;
+    let mut paren_depth = 0usize;
 
     for (i, ch) in src.char_indices() {
-        if in_string {
+        if in_string || in_char {
             if escaped {
                 escaped = false;
             } else if ch == '\\' {
                 escaped = true;
-            } else if ch == '"' {
+            } else if in_string && ch == '"' {
                 in_string = false;
+            } else if in_char && ch == '\'' {
+                in_char = false;
             }
             continue;
         }
 
         if ch == '"' {
             in_string = true;
-        } else if ch == ',' {
+        } else if ch == '\'' {
+            in_char = true;
+        } else if ch == '(' {
+            paren_depth += 1;
+        } else if ch == ')' {
+            paren_depth = paren_depth.saturating_sub(1);
+        } else if ch == ',' && paren_depth == 0 {
             push_arg(&mut args, &src[start..i]);
             start = i + ch.len_utf8();
         }
@@ -404,6 +420,99 @@ fn find_matching_brace(src: &str, open: usize) -> Result<usize, String> {
     Err("unclosed `{` block".to_string())
 }
 
+fn find_matching_paren(src: &str, open: usize) -> Result<usize, String> {
+    let bytes = src.as_bytes();
+    if open >= bytes.len() || bytes[open] != b'(' {
+        return Err("internal error: expected `(`".to_string());
+    }
+
+    let mut depth = 0usize;
+    let mut i = open;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' | b'\'' => {
+                let (_, next) = read_quoted_literal(src, i, bytes[i]);
+                i = next;
+                continue;
+            }
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Ok(i);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+
+    Err("unclosed `(` in expression macro".to_string())
+}
+
+fn count_top_level_args(src: &str) -> Result<usize, String> {
+    let bytes = src.as_bytes();
+    let mut i = 0usize;
+    let mut depth = 0usize;
+    let mut count = 0usize;
+    let mut has_arg = false;
+
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' | b'\'' => {
+                has_arg = true;
+                let (_, next) = read_quoted_literal(src, i, bytes[i]);
+                i = next;
+                continue;
+            }
+            b'(' => {
+                depth += 1;
+                has_arg = true;
+            }
+            b')' => {
+                if depth == 0 {
+                    return Err("unexpected `)` in expression macro arguments".to_string());
+                }
+                depth -= 1;
+            }
+            b',' if depth == 0 => {
+                count += 1;
+                has_arg = false;
+            }
+            b if b.is_ascii_whitespace() => {}
+            _ => has_arg = true,
+        }
+        i += 1;
+    }
+
+    if depth != 0 {
+        return Err("unclosed `(` in expression macro arguments".to_string());
+    }
+
+    Ok(if has_arg { count + 1 } else { count })
+}
+
+fn read_quoted_literal(src: &str, start: usize, quote: u8) -> (&str, usize) {
+    let bytes = src.as_bytes();
+    let mut i = start + 1;
+    let mut escaped = false;
+
+    while i < bytes.len() {
+        let b = bytes[i];
+        if escaped {
+            escaped = false;
+        } else if b == b'\\' {
+            escaped = true;
+        } else if b == quote {
+            i += 1;
+            return (&src[start..i], i);
+        }
+        i += 1;
+    }
+
+    (&src[start..], bytes.len())
+}
+
 fn is_ident_start(b: u8) -> bool {
     b.is_ascii_alphabetic() || b == b'_'
 }
@@ -490,6 +599,7 @@ fn parse_stmts(lines: &[Line], i: &mut usize, parent: usize) -> Result<Vec<Stmt>
         }
 
         if let Some(cond) = if_cond(&line.text) {
+            validate_expr_macros(&cond).map_err(|msg| err(line, &msg))?;
             *i += 1;
             let body = parse_stmts(lines, i, line.indent)?;
             if body.is_empty() {
@@ -513,6 +623,7 @@ fn parse_stmt(text: &str) -> Result<Stmt, String> {
     if let Some((name, expr)) = assignment(text) {
         let name = name.trim();
         ident(name, "assignment target")?;
+        validate_expr_macros(expr.trim())?;
         return Ok(Stmt::Assign {
             name: name.to_string(),
             expr: expr.trim().to_string(),
@@ -524,6 +635,9 @@ fn parse_stmt(text: &str) -> Result<Stmt, String> {
     ident(name, "call name")?;
     let args: Vec<String> = parts.map(str::to_string).collect();
     validate_call_args(name, args.len())?;
+    for arg in &args {
+        validate_expr_macros(arg)?;
+    }
     Ok(Stmt::Call {
         name: name.to_string(),
         args,
@@ -544,6 +658,62 @@ fn validate_call_args(name: &str, actual: usize) -> Result<(), String> {
             actual
         )),
         ScreenArgs::Exact(_) => Ok(()),
+    }
+}
+
+fn validate_expr_macros(src: &str) -> Result<(), String> {
+    let bytes = src.as_bytes();
+    let mut i = 0;
+
+    while i < bytes.len() {
+        let b = bytes[i];
+        if b == b'"' || b == b'\'' {
+            let (_, next) = read_quoted_literal(src, i, b);
+            i = next;
+            continue;
+        }
+
+        if is_ident_start(b) {
+            let start = i;
+            i += 1;
+            while i < bytes.len() && is_ident_continue(bytes[i]) {
+                i += 1;
+            }
+
+            let ident = &src[start..i];
+            if VerbMacro::parse(ident).is_some() && i < bytes.len() && bytes[i] == b'!' {
+                let paren = skip_ws(src, i + 1);
+                if paren >= bytes.len() || bytes[paren] != b'(' {
+                    return Err(format!("{}! expects `{}!(...)`", ident, ident));
+                }
+                let close = find_matching_paren(src, paren)?;
+                validate_expr_macro_args(ident, &src[paren + 1..close])?;
+                i = close + 1;
+                continue;
+            }
+        } else {
+            i += 1;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_expr_macro_args(name: &str, raw_args: &str) -> Result<(), String> {
+    let Some(verb_macro) = VerbMacro::parse(name) else {
+        return Ok(());
+    };
+
+    let actual = count_top_level_args(raw_args)?;
+    match verb_macro.spec().args {
+        VerbArgs::Exact(expected) if actual != expected => Err(format!(
+            "{}! expects {} argument{}, got {}",
+            name,
+            expected,
+            if expected == 1 { "" } else { "s" },
+            actual
+        )),
+        VerbArgs::Exact(_) => Ok(()),
     }
 }
 
