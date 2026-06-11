@@ -82,7 +82,7 @@ impl CrustiniApp for App {
         }
     }
 
-    fn draw(&self, screen: &mut Screen<'_>) {
+    fn draw(&mut self, screen: &mut Screen<'_>) {
         screen.clear(5);
         screen.rect(self.paddle_x, 202, 52, 7, 245);
     }

@@ -1,0 +1,59 @@
++++
+crustini = "0.1"
+name = "Empty Starter"
+fps = 30
+window = [220, 140]
++++
+
+app! Main {
+  state {
+    x: number = 110;
+    y: number = 70;
+    speed: number = 3;
+    pulse: number = 8;
+    pulse_dir: number = 1;
+    shade: Color = 180;
+  }
+
+  fn update() {
+    x = clamp(x + axis_x() * speed, 16, 204);
+    y = clamp(y + axis_y() * speed, 40, 124);
+
+    pulse += pulse_dir;
+
+    if pulse > 15 {
+      pulse_dir = -1;
+    }
+
+    if pulse < 7 {
+      pulse_dir = 1;
+    }
+
+    shade = 180;
+
+    if pressed(Button::A) {
+      shade = Color::White;
+    }
+
+    if pressed(Button::B) {
+      x = 110;
+      y = 70;
+    }
+  }
+
+  fn draw() {
+    clear(Color::Black);
+
+    rect(8, 8, 204, 124, 18);
+    line(8, 34, 212, 34, 70);
+    text(18, 18, "EMPTY STARTER", Color::White);
+
+    line(110, 40, 110, 124, 42);
+    line(16, 70, 204, 70, 42);
+
+    circle(x, y, pulse, shade);
+    rect(x - 3, y - 3, 6, 6, Color::Black);
+
+    text(18, 116, "ARROWS MOVE  A GLOW  B RESET", 120);
+  }
+}

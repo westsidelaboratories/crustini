@@ -4,6 +4,9 @@ export type Command = {
 };
 
 export const exampleApps = [
+  "examples/new-examples/sketch-pulse.flour",
+  "examples/new-examples/keyboard-mover.flour",
+  "examples/new-examples/mouse-follow.flour",
   "examples/hello-world",
   "examples/brick-breaker/app.flour",
   "examples/brick-breaker-plus/app.flour",

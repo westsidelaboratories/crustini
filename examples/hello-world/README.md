@@ -2,7 +2,7 @@
 
 This is the smallest current project-shaped starter.
 
-The active language direction is [`../../new-spec.md`](../../new-spec.md). Product-facing beginner projects should move toward one `main.flour` file with front matter. This example still uses the current compatibility project layout.
+The source follows the active language direction in [`../../new-spec.md`](../../new-spec.md): TOML front matter plus `app! Main` with normal `fn update()` and `fn draw()` blocks.
 
 ## Authored Files
 
@@ -13,7 +13,7 @@ examples/hello-world/
   README.md
 ```
 
-`recipe.flour` is compatibility project config. `src/main.flour` is the authored app source.
+`recipe.flour` is compatibility project config for the current CLI project runner. `src/main.flour` is the authored app source.
 
 ## Run
 

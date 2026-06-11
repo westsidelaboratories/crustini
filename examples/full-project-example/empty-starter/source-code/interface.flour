@@ -1,0 +1,35 @@
++++
+crustini = "0.1"
+name = "Interface Notes"
+fps = 30
+window = [220, 140]
++++
+
+// This file is not loaded by the current compiler.
+// It exists as starter boilerplate for future UI helpers and editor highlighting.
+
+struct Panel {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  title: text;
+}
+
+enum ScreenMode {
+  Title,
+  Playing,
+  Paused,
+}
+
+fn draw_panel(panel: Panel, active: bool) {
+  let mut border: Color = Color::Gray;
+
+  if active {
+    border = Color::White;
+  }
+
+  rect(panel.x, panel.y, panel.w, panel.h, 24);
+  line(panel.x, panel.y + 18, panel.x + panel.w, panel.y + 18, border);
+  text(panel.x + 8, panel.y + 6, panel.title, border);
+}

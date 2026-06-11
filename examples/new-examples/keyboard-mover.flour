@@ -1,0 +1,38 @@
++++
+crustini = "0.1"
+name = "Keyboard Mover"
+fps = 30
+window = [220, 140]
++++
+
+app! Main {
+  state {
+    x: number = 110;
+    y: number = 70;
+    speed: number = 4;
+    shade: Color = 180;
+  }
+
+  fn update() {
+    x = clamp(x + axis_x() * speed, 12, 208);
+    y = clamp(y + axis_y() * speed, 12, 128);
+
+    if pressed(Button::A) {
+      shade = Color::White;
+    }
+
+    if pressed(Button::B) {
+      shade = 90;
+    }
+  }
+
+  fn draw() {
+    clear(8);
+    rect(8, 8, 204, 124, 24);
+    line(8, 32, 212, 32, 64);
+    circle(x, y, 11, shade);
+    rect(x - 4, y - 4, 8, 8, Color::Black);
+    text(18, 18, "ARROWS MOVE", Color::White);
+    text(18, 116, "A BRIGHT  B DIM", 130);
+  }
+}

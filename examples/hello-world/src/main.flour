@@ -1,27 +1,34 @@
-app! {
-  state! {
-    pulse: i16 = 0
-    pulse_dir: i16 = 1
++++
+crustini = "0.1"
+name = "Hello World"
+fps = 30
+window = [180, 120]
++++
+
+app! Main {
+  state {
+    pulse: number = 0;
+    pulse_dir: number = 1;
   }
 
-  update! {
-    pulse = pulse + pulse_dir
+  fn update() {
+    pulse += pulse_dir;
 
     if pulse > 12 {
-      pulse_dir = -1
+      pulse_dir = -1;
     }
 
     if pulse < 0 {
-      pulse_dir = 1
+      pulse_dir = 1;
     }
   }
 
-  draw! {
-    clear!(8)
-    rect!(14, 18, 152, 84, 18)
-    line!(14, 34, 165, 34, 70)
-    text!(48, 48 - pulse, "HELLO", 255)
-    text!(42, 62 + pulse, "WORLD", 210)
-    text!(28, 94, "RX RUNS THIS", 120)
+  fn draw() {
+    clear(Color::Black);
+    rect(14, 18, 152, 84, 18);
+    line(14, 34, 165, 34, 70);
+    text(48, 48 - pulse, "HELLO", Color::White);
+    text(42, 62 + pulse, "WORLD", 210);
+    text(28, 94, "RX RUNS THIS", 120);
   }
 }

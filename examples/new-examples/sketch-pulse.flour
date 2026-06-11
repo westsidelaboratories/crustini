@@ -1,0 +1,43 @@
++++
+crustini = "0.1"
+name = "Sketch Pulse"
+fps = 30
+window = [180, 120]
++++
+
+app! Main {
+  state {
+    x: number = 24;
+    dir: number = 2;
+    pulse: number = 8;
+    pulse_dir: number = 1;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+
+    x += dir;
+    pulse += pulse_dir;
+
+    if x > 156 {
+      dir = -2;
+    }
+
+    if x < 24 {
+      dir = 2;
+    }
+
+    if pulse > 16 {
+      pulse_dir = -1;
+    }
+
+    if pulse < 6 {
+      pulse_dir = 1;
+    }
+
+    line(0, 60, 180, 60, 70);
+    circle(x, 60, pulse, Color::White);
+    rect(x - 18, 88, 36, 8, 140);
+    text(22, 16, "DRAW MUTATES", 180);
+  }
+}

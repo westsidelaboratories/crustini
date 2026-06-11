@@ -1,6 +1,6 @@
 import { arg, run } from "./lib";
 
-const app = arg(0, "examples/hello-world");
+const app = arg(0, "examples/new-examples/sketch-pulse.flour");
 
 await run({
   cmd: ["cargo", "run", "--bin", "rx", "--", "bake", app],
