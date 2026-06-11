@@ -7,5 +7,5 @@ use crate::{Buttons, Screen};
 pub trait CrustiniApp {
     fn setup(&mut self, _screen: &mut Screen<'_>) {}
     fn update(&mut self, _input: Buttons) {}
-    fn draw(&self, _screen: &mut Screen<'_>) {}
+    fn draw(&mut self, _screen: &mut Screen<'_>) {}
 }

@@ -25,7 +25,10 @@ pub fn emit_rust(app: &App) -> String {
 
     pushln(&mut out, "pub struct App {");
     for field in &app.state {
-        pushln(&mut out, &format!("    pub {}: {},", field.name, field.ty));
+        pushln(
+            &mut out,
+            &format!("    pub {}: {},", field.name, lower_type(&field.ty)),
+        );
     }
     pushln(&mut out, "}");
     pushln(&mut out, "");
@@ -34,10 +37,8 @@ pub fn emit_rust(app: &App) -> String {
     pushln(&mut out, "    pub const fn new() -> Self {");
     pushln(&mut out, "        Self {");
     for field in &app.state {
-        pushln(
-            &mut out,
-            &format!("            {}: {},", field.name, field.value),
-        );
+        let value = rewrite_expr(&field.value, &state_names, false);
+        pushln(&mut out, &format!("            {}: {},", field.name, value));
     }
     pushln(&mut out, "        }");
     pushln(&mut out, "    }");
@@ -76,7 +77,10 @@ pub fn emit_rust(app: &App) -> String {
     pushln(&mut out, "    }");
     pushln(&mut out, "");
 
-    pushln(&mut out, "    fn draw(&self, screen: &mut Screen<'_>) {");
+    pushln(
+        &mut out,
+        "    fn draw(&mut self, screen: &mut Screen<'_>) {",
+    );
     if app.draw.is_empty() {
         pushln(&mut out, "        let _ = screen;");
     } else {
@@ -119,9 +123,12 @@ fn emit_stmt(
     let pad = "    ".repeat(indent);
 
     match stmt {
-        Stmt::Assign { name, expr } => {
+        Stmt::Assign { name, op, expr } => {
             let expr = rewrite_expr(expr, state_names, input_available);
-            pushln(out, &format!("{}self.{} = {};", pad, name, expr));
+            pushln(
+                out,
+                &format!("{}self.{} {} {};", pad, name, op.rust_token(), expr),
+            );
         }
         Stmt::If { cond, body } => {
             let cond = rewrite_expr(cond, state_names, input_available);
@@ -186,6 +193,13 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
 
             if prev_is_dot {
                 out.push_str(ident);
+            } else if ident == "Color" && src[i..].starts_with("::") {
+                if let Some((color, next)) = read_path_variant(src, i + 2) {
+                    out.push_str(color_value(color).unwrap_or("0"));
+                    i = next;
+                } else {
+                    out.push_str(ident);
+                }
             } else if i < bytes.len() && bytes[i] == b'!' {
                 if let Some(verb_macro) = VerbMacro::parse(ident) {
                     out.push_str(verb_macro.spec().rust_path);
@@ -195,6 +209,19 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
                     out.push('!');
                     i += 1;
                 }
+            } else if let Some(verb_macro) = VerbMacro::parse(ident) {
+                let call_start = skip_ws(src, i);
+                if call_start < bytes.len() && bytes[call_start] == b'(' {
+                    out.push_str(verb_macro.spec().rust_path);
+                } else if contains_ident(state_names, ident) {
+                    out.push_str("self.");
+                    out.push_str(ident);
+                } else {
+                    out.push_str(ident);
+                }
+            } else if let Some((lowered, next)) = lower_input_call(src, ident, i, input_available) {
+                out.push_str(&lowered);
+                i = next;
             } else if contains_ident(state_names, ident) {
                 out.push_str("self.");
                 out.push_str(ident);
@@ -212,6 +239,143 @@ fn rewrite_expr(src: &str, state_names: &[String], input_available: bool) -> Str
     }
 
     out
+}
+
+fn lower_type(ty: &str) -> &str {
+    match ty.trim() {
+        "number" => "i16",
+        "text" => "&'static str",
+        "bool" => "bool",
+        "Color" => "u8",
+        "i16" => "i16",
+        "i32" => "i32",
+        "u8" => "u8",
+        "usize" => "usize",
+        other => other,
+    }
+}
+
+fn lower_input_call(
+    src: &str,
+    ident: &str,
+    after_ident: usize,
+    input_available: bool,
+) -> Option<(String, usize)> {
+    if !input_available {
+        return None;
+    }
+
+    let call_start = skip_ws(src, after_ident);
+    if call_start >= src.len() || src.as_bytes()[call_start] != b'(' {
+        return None;
+    }
+    let close = find_matching_paren(src, call_start).ok()?;
+    let args = src[call_start + 1..close].trim();
+
+    let lowered = match ident {
+        "pressed" | "down" => {
+            let field = button_field(args)?;
+            format!("input.{}", field)
+        }
+        "released" => "false".to_string(),
+        "axis_x" if args.is_empty() => "((input.right as i16) - (input.left as i16))".to_string(),
+        "axis_y" if args.is_empty() => "((input.down as i16) - (input.up as i16))".to_string(),
+        "mouse_x" if args.is_empty() => "input.mouse_x".to_string(),
+        "mouse_y" if args.is_empty() => "input.mouse_y".to_string(),
+        "mouse_down" if args.is_empty() => "input.mouse_down".to_string(),
+        "dt" if args.is_empty() => "1".to_string(),
+        _ => return None,
+    };
+
+    Some((lowered, close + 1))
+}
+
+fn button_field(src: &str) -> Option<&'static str> {
+    let name = src
+        .trim()
+        .strip_prefix("Button::")
+        .unwrap_or(src.trim())
+        .trim();
+
+    match name {
+        "Up" | "up" => Some("up"),
+        "Down" | "down" => Some("down"),
+        "Left" | "left" => Some("left"),
+        "Right" | "right" => Some("right"),
+        "A" | "a" => Some("a"),
+        "B" | "b" => Some("b"),
+        "Start" | "start" => Some("start"),
+        "Select" | "select" => Some("select"),
+        "Mouse" | "MouseLeft" | "mouse" | "mouse_down" => Some("mouse_down"),
+        _ => None,
+    }
+}
+
+fn color_value(name: &str) -> Option<&'static str> {
+    match name {
+        "Black" => Some("0"),
+        "White" => Some("255"),
+        "Gray" | "Grey" => Some("128"),
+        "Red" => Some("224"),
+        "Green" => Some("180"),
+        "Blue" => Some("96"),
+        "Yellow" => Some("240"),
+        "Cyan" => Some("190"),
+        "Magenta" => Some("210"),
+        _ => None,
+    }
+}
+
+fn read_path_variant(src: &str, start: usize) -> Option<(&str, usize)> {
+    let bytes = src.as_bytes();
+    if start >= bytes.len() || !is_ident_start(bytes[start]) {
+        return None;
+    }
+
+    let mut i = start + 1;
+    while i < bytes.len() && is_ident_continue(bytes[i]) {
+        i += 1;
+    }
+
+    Some((&src[start..i], i))
+}
+
+fn skip_ws(src: &str, mut i: usize) -> usize {
+    let bytes = src.as_bytes();
+    while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+        i += 1;
+    }
+    i
+}
+
+fn find_matching_paren(src: &str, open: usize) -> Result<usize, String> {
+    let bytes = src.as_bytes();
+    if open >= bytes.len() || bytes[open] != b'(' {
+        return Err("internal error: expected `(`".to_string());
+    }
+
+    let mut depth = 0usize;
+    let mut i = open;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' | b'\'' => {
+                let (_, next) = read_quoted_literal(src, i, bytes[i]);
+                i = next;
+                continue;
+            }
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Ok(i);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+
+    Err("unclosed `(`".to_string())
 }
 
 fn read_quoted_literal(src: &str, start: usize, quote: u8) -> (&str, usize) {
@@ -266,6 +430,22 @@ fn expr_uses_input(src: &str) -> bool {
             let ident = &src[start..i];
             let prev_is_dot = start > 0 && bytes[start - 1] == b'.';
             if !prev_is_dot && input::field_name(ident).is_some() {
+                return true;
+            }
+            if !prev_is_dot
+                && matches!(
+                    ident,
+                    "pressed"
+                        | "down"
+                        | "released"
+                        | "axis_x"
+                        | "axis_y"
+                        | "mouse_x"
+                        | "mouse_y"
+                        | "mouse_down"
+                        | "dt"
+                )
+            {
                 return true;
             }
         } else {

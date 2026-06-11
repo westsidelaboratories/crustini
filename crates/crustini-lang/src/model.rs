@@ -18,9 +18,40 @@ pub struct StateField {
 
 #[derive(Debug, Clone)]
 pub enum Stmt {
-    Assign { name: String, expr: String },
-    If { cond: String, body: Vec<Stmt> },
-    Call { name: String, args: Vec<String> },
+    Assign {
+        name: String,
+        op: AssignOp,
+        expr: String,
+    },
+    If {
+        cond: String,
+        body: Vec<Stmt>,
+    },
+    Call {
+        name: String,
+        args: Vec<String>,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AssignOp {
+    Set,
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
+impl AssignOp {
+    pub fn rust_token(self) -> &'static str {
+        match self {
+            AssignOp::Set => "=",
+            AssignOp::Add => "+=",
+            AssignOp::Sub => "-=",
+            AssignOp::Mul => "*=",
+            AssignOp::Div => "/=",
+        }
+    }
 }
 
 impl Default for App {

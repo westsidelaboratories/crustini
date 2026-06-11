@@ -41,6 +41,68 @@ mod tests {
     }
 
     #[test]
+    fn new_flour_front_matter_and_app_form_compile() {
+        let rust = compile_to_rust(
+            r#"+++
+crustini = "0.1"
+name = "Mover"
+fps = 24
+window = [640, 360]
++++
+
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    x += 2;
+    circle(x, 180, 24, Color::White);
+  }
+}
+"#,
+        )
+        .unwrap();
+
+        assert!(rust.contains("pub const WIDTH: usize = 640;"));
+        assert!(rust.contains("pub const HEIGHT: usize = 360;"));
+        assert!(rust.contains("pub const FPS: usize = 24;"));
+        assert!(rust.contains("pub x: i16,"));
+        assert!(rust.contains("fn draw(&mut self, screen: &mut Screen<'_>) {"));
+        assert!(rust.contains("screen.clear(0);"));
+        assert!(rust.contains("self.x += 2;"));
+        assert!(rust.contains("screen.circle(self.x, 180, 24, 255);"));
+    }
+
+    #[test]
+    fn new_input_helpers_lower_to_buttons_fields() {
+        let rust = compile_to_rust(
+            r#"+++
+crustini = "0.1"
+window = [180, 120]
++++
+
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn update() {
+    if pressed(Button::A) {
+      x += axis_x();
+    }
+  }
+}
+"#,
+        )
+        .unwrap();
+
+        assert!(rust.contains("if input.a {"));
+        assert!(rust.contains("self.x += ((input.right as i16) - (input.left as i16));"));
+    }
+
+    #[test]
     fn expression_rewrite_leaves_text_literals_alone() {
         let rust = compile_to_rust(
             r#"app! {

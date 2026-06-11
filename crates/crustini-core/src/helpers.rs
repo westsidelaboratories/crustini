@@ -8,6 +8,7 @@ pub fn clamp_i16(value: i16, min: i16, max: i16) -> i16 {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn hit_rect(ax: i16, ay: i16, aw: i16, ah: i16, bx: i16, by: i16, bw: i16, bh: i16) -> bool {
     ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by
 }

@@ -2,7 +2,7 @@ use crate::macros::app::AppMacro;
 use crate::macros::block::BlockMacro;
 use crate::macros::screen::{ScreenArgs, ScreenMacro};
 use crate::macros::verb::{VerbArgs, VerbMacro};
-use crate::model::{App, StateField, Stmt};
+use crate::model::{App, AssignOp, StateField, Stmt};
 
 struct Line {
     no: usize,
@@ -11,11 +11,15 @@ struct Line {
 }
 
 pub fn scan_app(src: &str) -> Result<App, String> {
-    if src.contains('{') {
-        return scan_braced_app(src);
-    }
+    let (front_matter, source) = split_front_matter(src)?;
+    let mut app = if source.contains('{') {
+        scan_braced_app(source)?
+    } else {
+        scan_indented_app(source)?
+    };
 
-    scan_indented_app(src)
+    apply_front_matter(front_matter, &mut app)?;
+    Ok(app)
 }
 
 fn scan_indented_app(src: &str) -> Result<App, String> {
@@ -88,6 +92,39 @@ fn parse_braced_app_body(body: &str) -> Result<App, String> {
         i = skip_ws(body, i);
         if i >= body.len() {
             break;
+        }
+
+        if starts_with_keyword(body, i, "fn") {
+            let after_fn = skip_ws(body, i + 2);
+            let (name, after_name) = read_ident(body, after_fn)
+                .ok_or_else(|| "`fn` block needs a lifecycle name".to_string())?;
+            let paren = skip_ws(body, after_name);
+            if paren >= body.len() || body.as_bytes()[paren] != b'(' {
+                return Err(format!("fn {} needs `()` before its body", name));
+            }
+            let close_paren = find_matching_paren(body, paren)?;
+            let open = skip_ws(body, close_paren + 1);
+            if open >= body.len() || body.as_bytes()[open] != b'{' {
+                return Err(format!("fn {} needs a `{{ ... }}` body", name));
+            }
+            let close = find_matching_brace(body, open)?;
+            let block_body = &body[open + 1..close];
+            let stmts = parse_braced_stmt_block(block_body)?;
+
+            match name.as_str() {
+                "setup" => app.setup = stmts,
+                "update" => app.update = stmts,
+                "draw" => app.draw = stmts,
+                _ => {
+                    return Err(format!(
+                        "unknown app lifecycle `fn {}`; expected setup, update, or draw",
+                        name
+                    ))
+                }
+            }
+
+            i = close + 1;
+            continue;
         }
 
         if let Some((ident, after_ident)) = read_ident(body, i) {
@@ -230,12 +267,13 @@ fn parse_braced_stmt_block(body: &str) -> Result<Vec<Stmt>, String> {
 }
 
 fn parse_braced_stmt_line(line: &str) -> Result<Stmt, String> {
-    if let Some((name, expr)) = assignment(line) {
+    if let Some((name, op, expr)) = assignment(line) {
         let name = name.trim();
         ident(name, "assignment target")?;
         validate_expr_macros(expr.trim())?;
         return Ok(Stmt::Assign {
             name: name.to_string(),
+            op,
             expr: expr.trim().to_string(),
         });
     }
@@ -620,12 +658,13 @@ fn parse_stmts(lines: &[Line], i: &mut usize, parent: usize) -> Result<Vec<Stmt>
 fn parse_stmt(text: &str) -> Result<Stmt, String> {
     let text = text.trim().trim_end_matches(';').trim();
 
-    if let Some((name, expr)) = assignment(text) {
+    if let Some((name, op, expr)) = assignment(text) {
         let name = name.trim();
         ident(name, "assignment target")?;
         validate_expr_macros(expr.trim())?;
         return Ok(Stmt::Assign {
             name: name.to_string(),
+            op,
             expr: expr.trim().to_string(),
         });
     }
@@ -681,8 +720,12 @@ fn validate_expr_macros(src: &str) -> Result<(), String> {
             }
 
             let ident = &src[start..i];
-            if VerbMacro::parse(ident).is_some() && i < bytes.len() && bytes[i] == b'!' {
-                let paren = skip_ws(src, i + 1);
+            if VerbMacro::parse(ident).is_some() {
+                let bang = i < bytes.len() && bytes[i] == b'!';
+                let paren = skip_ws(src, if bang { i + 1 } else { i });
+                if !bang && (paren >= bytes.len() || bytes[paren] != b'(') {
+                    continue;
+                }
                 if paren >= bytes.len() || bytes[paren] != b'(' {
                     return Err(format!("{}! expects `{}!(...)`", ident, ident));
                 }
@@ -814,7 +857,76 @@ fn split_head(text: &str) -> Option<(&str, &str)> {
     }
 }
 
-fn assignment(text: &str) -> Option<(&str, &str)> {
+fn split_front_matter(src: &str) -> Result<(Option<&str>, &str), String> {
+    let trimmed = src.trim_start();
+    if !trimmed.starts_with("+++") {
+        return Ok((None, src));
+    }
+
+    let leading_ws = src.len() - trimmed.len();
+    let first_line_end = src[leading_ws..]
+        .find('\n')
+        .map(|idx| leading_ws + idx)
+        .ok_or("front matter must close with `+++`")?;
+    if src[leading_ws..first_line_end].trim() != "+++" {
+        return Ok((None, src));
+    }
+
+    let body_start = first_line_end + 1;
+    let mut pos = body_start;
+    for line in src[body_start..].split_inclusive('\n') {
+        let line_no_newline = line.trim_end_matches('\n').trim_end_matches('\r');
+        if line_no_newline.trim() == "+++" {
+            let close_start = pos;
+            let close_end = pos + line.len();
+            return Ok((Some(&src[body_start..close_start]), &src[close_end..]));
+        }
+        pos += line.len();
+    }
+
+    Err("front matter must close with `+++`".to_string())
+}
+
+fn apply_front_matter(front_matter: Option<&str>, app: &mut App) -> Result<(), String> {
+    let Some(front_matter) = front_matter else {
+        return Ok(());
+    };
+
+    for raw in front_matter.lines() {
+        let line = strip_comment(raw).trim();
+        if line.is_empty() {
+            continue;
+        }
+
+        let Some((key, value)) = line.split_once('=') else {
+            return Err(format!("front matter line needs `key = value`: `{}`", line));
+        };
+        let key = key.trim();
+        let value = value.trim();
+
+        match key {
+            "fps" => app.fps = int(value, "fps")?,
+            "window" => {
+                let inner = value
+                    .strip_prefix('[')
+                    .and_then(|value| value.strip_suffix(']'))
+                    .ok_or_else(|| "front matter `window` expects `[WIDTH, HEIGHT]`".to_string())?;
+                let parts: Vec<&str> = inner.split(',').map(str::trim).collect();
+                if parts.len() != 2 {
+                    return Err("front matter `window` expects `[WIDTH, HEIGHT]`".to_string());
+                }
+                app.width = int(parts[0], "window width")?;
+                app.height = int(parts[1], "window height")?;
+            }
+            "crustini" | "name" | "code" | "assets" => {}
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+
+fn assignment(text: &str) -> Option<(&str, AssignOp, &str)> {
     let bytes = text.as_bytes();
     for i in 0..bytes.len() {
         if bytes[i] != b'=' {
@@ -824,7 +936,14 @@ fn assignment(text: &str) -> Option<(&str, &str)> {
         let prev = i.checked_sub(1).map(|j| bytes[j]).unwrap_or_default();
         let next = bytes.get(i + 1).copied().unwrap_or_default();
         if prev != b'=' && prev != b'!' && prev != b'<' && prev != b'>' && next != b'=' {
-            return Some((&text[..i], &text[i + 1..]));
+            let (name, op) = match prev {
+                b'+' => (&text[..i - 1], AssignOp::Add),
+                b'-' => (&text[..i - 1], AssignOp::Sub),
+                b'*' => (&text[..i - 1], AssignOp::Mul),
+                b'/' => (&text[..i - 1], AssignOp::Div),
+                _ => (&text[..i], AssignOp::Set),
+            };
+            return Some((name, op, &text[i + 1..]));
         }
     }
 

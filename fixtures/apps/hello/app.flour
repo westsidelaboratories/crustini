@@ -1,13 +1,17 @@
-app! {
-  screen!(128, 64)
-  fps!(30)
++++
+crustini = "0.1"
+name = "Hello"
+fps = 30
+window = [128, 64]
++++
 
-  setup! {
-    clear!(0)
+app! Main {
+  fn setup() {
+    clear(Color::Black);
   }
 
-  draw! {
-    clear!(0)
-    text!(28, 24, "HELLO WORLD!", 255)
+  fn draw() {
+    clear(Color::Black);
+    text(28, 24, "HELLO WORLD!", Color::White);
   }
 }
