@@ -2,7 +2,7 @@ const editor = document.querySelector("#editor");
 const preview = document.querySelector("#preview");
 const copyHtml = document.querySelector("#copyHtml");
 
-const starter = `# Crustini UI notes
+const starter = `# Crustini sketch notes
 
 Vocabulary:
 
@@ -13,46 +13,45 @@ Vocabulary:
 
 Use plain words for artifacts, diagnostics, logs, generated Rust, and runtime details.
 
-We use macro-shaped source. \`app!\` is the root macro, and sections/calls can stay macro-flavored too.
-
-The first UI layer is not LVGL. It is tiny immediate-mode drawing plus MiniUI helpers.
+Crustini starts with Processing-style sketches and grows into structured update/draw apps.
 
 \`\`\`flour
-app! {
-  screen!(240, 135)
-  fps!(30)
++++
+crustini = "0.1"
+name = "Counter"
+fps = 30
+window = [640, 360]
++++
 
-  state! {
-    count: i32 = 0
+app! Main {
+  state {
+    count: number = 0;
   }
 
-  update! {
-    if a {
-      count = count + 1
+  fn update() {
+    if pressed(Button::A) {
+      count += 1;
     }
 
-    if b {
-      count = count - 1
+    if pressed(Button::B) {
+      count -= 1;
     }
   }
 
-  draw! {
-    clear!(0)
-    rect!(8, 8, 224, 119, 24)
-    line!(8, 34, 232, 34, 96)
+  fn draw() {
+    clear(Color::Black);
+    text(24, 24, "COUNT", Color::White);
   }
 }
 \`\`\`
 
 ## What this compiles into
 
-\`\`\`crs
-CLEAR BLACK
-TEXT 8 8 "COUNT" WHITE BOLD_12
-LINE 8 24 232 24 GRAY
-TEXT_STATE_I32 8 52 count GREEN BOLD_16
-TEXT 8 116 "A:+  B:-" GRAY
-FLUSH
+\`\`\`txt
+.flour source
+  -> Crustini compiler
+  -> generated Rust
+  -> native preview or artifact
 \`\`\`
 `;
 
@@ -87,7 +86,7 @@ function renderDocs(md) {
 
   function flushCode() {
     const raw = code.join("\n");
-    if (codeLang === "flour" || codeLang === "crs" || codeLang === "crustini") {
+    if (codeLang === "flour" || codeLang === "crustini") {
       html += `<pre class="crs-code"><code class="language-flour">${CrustiniHighlight.highlight(raw, true)}</code></pre>\n`;
     } else {
       html += `<pre><code>${esc(raw)}</code></pre>\n`;

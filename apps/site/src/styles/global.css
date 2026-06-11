@@ -285,7 +285,7 @@ h3 {
 .crs-comment { color: #777b84; font-style: italic; }
 .crs-string { color: #9de66d; }
 .crs-number { color: #ffbf69; }
-.crs-macro { color: var(--flour); font-weight: 820; }
+.crs-compiler { color: var(--flour); font-weight: 820; }
 .crs-keyword { color: var(--jam); font-weight: 720; }
 .crs-declaration { color: var(--violet); font-weight: 720; }
 .crs-type { color: var(--sky); }

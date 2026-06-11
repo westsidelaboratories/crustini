@@ -4,7 +4,7 @@
    Usage:
    <link rel="stylesheet" href="themes/crustini-dark.css">
    <script src="dist/crustini-highlight.js"></script>
-   <pre class="crs-code"><code class="language-flour">app! { ... }</code></pre>
+   <pre class="crs-code"><code class="language-flour">app! Main { ... }</code></pre>
    <script>CrustiniHighlight.highlightAll();</script>
 */
 (() => {
@@ -23,100 +23,71 @@
     "continue",
     "for",
     "while",
-    "in",
-    "use",
-    "as"
+    "in"
   ]);
   var CRS_DECLARATIONS = new Set([
-    "app",
-    "name",
-    "target",
-    "display",
-    "input",
-    "button",
     "state",
-    "screen",
-    "fps",
+    "fn",
+    "struct",
+    "enum",
     "setup",
     "update",
-    "draw",
-    "on",
-    "every",
-    "const",
-    "goto"
+    "draw"
   ]);
   var CRS_TYPES = new Set([
-    "u8",
-    "u16",
-    "u32",
-    "u64",
-    "usize",
-    "i8",
-    "i16",
-    "i32",
-    "i64",
-    "isize",
+    "number",
+    "text",
     "bool",
-    "str",
-    "char",
-    "f32",
-    "f64",
-    "rgb565",
-    "rgb888",
-    "mono"
+    "Vec2",
+    "Color",
+    "Button",
+    "Sprite"
   ]);
   var CRS_CONSTANTS = new Set([
-    "BLACK",
-    "WHITE",
-    "GRAY",
-    "GREEN",
-    "RED",
-    "BLUE",
-    "YELLOW",
-    "MAGENTA",
-    "CYAN",
-    "ON",
-    "OFF",
-    "Main",
-    "Run",
-    "Wifi",
-    "Info",
-    "Settings",
-    "bold_12",
-    "bold_16",
-    "big",
-    "small",
-    "landscape",
-    "portrait",
-    "esp32_s3",
-    "rp2040",
-    "stm32",
-    "st7789",
-    "ssd1306",
-    "sh1106",
-    "ili9341"
+    "Black",
+    "White",
+    "Gray",
+    "Green",
+    "Red",
+    "Blue",
+    "Yellow",
+    "Magenta",
+    "Cyan",
+    "A",
+    "B",
+    "Left",
+    "Right",
+    "Up",
+    "Down",
+    "Start",
+    "Select",
+    "Title",
+    "Playing",
+    "Dead"
   ]);
   var CRS_BUILTINS = new Set([
     "clear",
-    "pixel",
     "line",
     "rect",
-    "fill_rect",
     "circle",
     "text",
-    "bitmap",
     "sprite",
-    "flush",
-    "progress",
-    "menu",
-    "card",
-    "meter",
-    "toggle",
-    "slider",
-    "redraw",
+    "vec2",
+    "pressed",
+    "down",
+    "released",
+    "axis_x",
+    "axis_y",
+    "stick",
+    "mouse_x",
+    "mouse_y",
+    "mouse_down",
+    "dt",
     "min",
     "max",
-    "clamp"
+    "clamp",
+    "abs",
+    "hit_rect"
   ]);
   var isAlpha = (ch) => /[A-Za-z_]/.test(ch);
   var isDigit = (ch) => /[0-9]/.test(ch);
@@ -180,9 +151,14 @@
           j++;
         const word = line.slice(i, j);
         const rest = line.slice(j);
-        if (rest.startsWith("!")) {
-          tokens.push({ kind: "macro", value: `${word}!` });
+        if (word === "app" && rest.startsWith("!")) {
+          tokens.push({ kind: "compiler", value: `${word}!` });
           i = j + 1;
+          continue;
+        }
+        if (rest.startsWith("!")) {
+          tokens.push({ kind: "identifier", value: word });
+          i = j;
           continue;
         }
         if (CRS_DECLARATIONS.has(word)) {
@@ -210,13 +186,19 @@
           i = j;
           continue;
         }
-        if (/^\s*:/.test(rest)) {
+        if (/^\s*[:=]/.test(rest)) {
           tokens.push({ kind: "property", value: word });
           i = j;
           continue;
         }
         tokens.push({ kind: "identifier", value: word });
         i = j;
+        continue;
+      }
+      const two = line.slice(i, i + 2);
+      if (["::", "==", "!=", "<=", ">=", "&&", "||", "+=", "-=", "->", "=>"].includes(two)) {
+        tokens.push({ kind: two === "::" ? "punctuation" : "operator", value: two });
+        i += 2;
         continue;
       }
       if ("{}[](),:.".includes(ch)) {
@@ -245,7 +227,7 @@
     comment: "crs-comment",
     string: "crs-string",
     number: "crs-number",
-    macro: "crs-macro",
+    compiler: "crs-compiler",
     keyword: "crs-keyword",
     declaration: "crs-declaration",
     type: "crs-type",
@@ -283,7 +265,6 @@
   var DEFAULT_CRS_SELECTOR = [
     "code.language-flour",
     "code.language-crustini",
-    "code.language-crs",
     "pre.crs-code > code"
   ].join(", ");
   function shouldUseLineNumbers(options) {

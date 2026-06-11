@@ -6,7 +6,7 @@
   --crs-line: #68707d;
   --crs-keyword: #ff6f91;
   --crs-declaration: #e8b44a;
-  --crs-macro: #5dd8a8;
+  --crs-compiler: #5dd8a8;
   --crs-type: #68c7ff;
   --crs-string: #a7d76d;
   --crs-number: #f4a261;
@@ -76,7 +76,7 @@
 .crs-comment { color: var(--crs-comment); font-style: italic; }
 .crs-string { color: var(--crs-string); }
 .crs-number { color: var(--crs-number); }
-.crs-macro { color: var(--crs-macro); font-weight: 750; }
+.crs-compiler { color: var(--crs-compiler); font-weight: 750; }
 .crs-keyword { color: var(--crs-keyword); font-weight: 650; }
 .crs-declaration { color: var(--crs-declaration); font-weight: 650; }
 .crs-type { color: var(--crs-type); }

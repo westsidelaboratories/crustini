@@ -2,6 +2,8 @@
 
 These are real Crustini apps that can be run, baked, inspected, and changed.
 
+The active language direction is [`../new-spec.md`](../new-spec.md). Some examples still use current implementation compatibility syntax until the compiler catches up.
+
 Compiler fixtures live under `fixtures/`. This directory is for user-facing starter material and runnable apps.
 
 ## The Important Split
@@ -11,7 +13,7 @@ Every example has two kinds of files:
 | Kind | Owned by | Edit this? | Purpose |
 | --- | --- | --- | --- |
 | Authored `.flour` | You | Yes | Crustini source code. |
-| `recipe.flour` | You | Yes | Project config for project-shaped examples. |
+| `recipe.flour` | You | Yes | Compatibility config for current project-shaped examples. |
 | `.bakery/` or `.crustini/generated/` | `rx` | No | Generated Rust, Cargo files, preview shell, build output. |
 
 The full compile walkthrough is here:
@@ -34,9 +36,9 @@ bun run check
 
 | Example | Shape | Screen | What it proves |
 | --- | --- | --- | --- |
-| [hello-world](./hello-world/) | Project | `180x120` | `recipe.flour`, starter shape, generated project output. |
+| [hello-world](./hello-world/) | Project | `180x120` | Current compatibility project shape and generated project output. |
 | [brick-breaker](./brick-breaker/) | Single file | `160x90` | The smallest playable brick breaker. |
-| [brick-breaker-plus](./brick-breaker-plus/) | Single file | `320x240` | Bigger game using helper verbs and the deepest compile write-up. |
+| [brick-breaker-plus](./brick-breaker-plus/) | Single file | `320x240` | Bigger game with the deepest compile write-up. |
 | [mouse-orbit](./mouse-orbit/) | Single file | `180x120` | Mouse position, click state, simple animation. |
 | [dodge-dots](./dodge-dots/) | Single file | `180x120` | Arrows, mouse input, collision checks, reset state. |
 

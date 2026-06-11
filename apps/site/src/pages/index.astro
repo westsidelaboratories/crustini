@@ -2,41 +2,32 @@
 import { renderCrsBlock } from "@crustini/syntax";
 import "../styles/global.css";
 
-const example = `app! {
-  screen!(240, 135)
-  fps!(30)
+const example = `+++
+crustini = "0.1"
+name = "Mover"
+fps = 30
+window = [640, 360]
++++
 
-  state! {
-    x: i16 = 120
-    y: i16 = 67
-    vx: i16 = 1
+app! Main {
+  state {
+    x: number = 40;
+    speed: number = 120;
   }
 
-  setup! {
-    clear!(0)
+  fn update() {
+    x += axis_x() * speed * dt();
   }
 
-  update! {
-    x = x + vx
-
-    if x > 232 {
-      vx = -1
-    }
-
-    if x < 8 {
-      vx = 1
-    }
-  }
-
-  draw! {
-    clear!(12)
-    circle!(x, y, 8, 255)
+  fn draw() {
+    clear(Color::Black);
+    circle(x, 180, 24, Color::White);
   }
 }`;
 
-const miniExample = `rx starter brick-breaker my-game
-rx proof my-game/src/main.flour
-rx bake my-game/src/main.flour`;
+const miniExample = `rx my-sketch/main.flour
+rx proof my-sketch/main.flour
+rx bake my-sketch/main.flour`;
 ---
 
 <!doctype html>
@@ -44,7 +35,7 @@ rx bake my-game/src/main.flour`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Crustini is a tiny .flour language for playful apps that bakes into no_std Rust." />
+    <meta name="description" content="Crustini is a single-file-first creative coding language that bakes into generated Rust." />
     <title>Crustini - a tiny .flour language</title>
   </head>
   <body>
@@ -66,16 +57,16 @@ rx bake my-game/src/main.flour`;
       <section class="hero">
         <div class="shell hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow">tiny source language for playful apps</p>
+            <p class="eyebrow">creative coding source for playful apps</p>
             <h1>Crustini</h1>
-            <p class="lede">Write crisp <code>.flour</code> scripts for little games, toys, and tiny-screen experiments. Run them with <code>rx</code>, then bake them into boring <code>#![no_std]</code> Rust when it is time to ship.</p>
+            <p class="lede">Write immediate <code>.flour</code> sketches for little games, toys, and visual experiments. Start with Processing-style <code>draw</code>, then grow into structured <code>update</code>/<code>draw</code> apps.</p>
             <div class="actions">
               <a class="button primary" href="#bake">Bake a starter</a>
               <a class="button" href="/live/">Open Docs Live</a>
             </div>
             <div class="quick-strip" aria-label="Crustini language traits">
               <span>.flour files</span>
-              <span>fixed update/draw loop</span>
+              <span>sketch to update/draw</span>
               <span>no Rust ceremony</span>
             </div>
           </div>
@@ -95,12 +86,12 @@ rx bake my-game/src/main.flour`;
           <div>
             <p class="eyebrow">language first</p>
             <h2>Small syntax. Fast loops. Actual pixels.</h2>
-            <p>Crustini is not trying to hide a giant app stack behind cute names. A <code>.flour</code> file says what the screen is, what state exists, how <code>update</code> mutates it, and how <code>draw</code> paints it.</p>
+            <p>Crustini keeps the first move visual: one readable <code>.flour</code> file, optional front matter, explicit state, and normal drawing calls. Small sketches can animate in <code>draw</code>; larger apps move behavior into <code>update</code>.</p>
           </div>
           <div class="language-list" aria-label="Language highlights">
-            <div><strong>Macro-shaped</strong><span>Simple blocks that stay easy to scan.</span></div>
-            <div><strong>Game-loop native</strong><span><code>setup</code>, <code>update</code>, and <code>draw</code> are the main moves.</span></div>
-            <div><strong>Embedded headed</strong><span>Generated Rust moves toward fixed pools, handles, and no default heap.</span></div>
+            <div><strong>Processing first</strong><span><code>state</code> plus <code>draw</code> is enough to make motion.</span></div>
+            <div><strong>Structured when ready</strong><span><code>update</code>, <code>draw</code>, enums, matches, and helpers scale the sketch.</span></div>
+            <div><strong>Rust backend</strong><span>Generated Rust stays behind the language surface.</span></div>
           </div>
         </div>
       </section>
@@ -125,11 +116,11 @@ rx bake my-game/src/main.flour`;
           <div class="grid">
             <article class="tile">
               <h3>rx CLI</h3>
-              <p><code>crates/crustini</code> owns starters, project config, bakery writing, and Cargo orchestration.</p>
+              <p><code>crates/crustini</code> owns <code>rx</code>, starters, compatibility config, bakery writing, and Cargo orchestration.</p>
             </article>
             <article class="tile">
               <h3>.flour language</h3>
-              <p><code>crates/crustini-lang</code> parses the source app model and emits generated Rust.</p>
+              <p><code>crates/crustini-lang</code> parses <code>.flour</code>, builds the app model, and emits generated Rust.</p>
             </article>
             <article class="tile">
               <h3>Runtime surface</h3>
@@ -145,7 +136,7 @@ rx bake my-game/src/main.flour`;
             </article>
             <article class="tile">
               <h3>Compatibility</h3>
-              <p><code>build</code> and <code>.crst</code> still exist as old aliases, but new copy should say <code>bake</code> and <code>.flour</code>.</p>
+              <p>Current examples may keep compatibility syntax while the compiler catches up to the spec.</p>
             </article>
           </div>
         </div>

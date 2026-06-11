@@ -21,7 +21,6 @@
         ],
         "extensions": [
           ".flour",
-          ".crs",
           ".crst"
         ],
         "configuration": "./language-configuration.json"
@@ -30,7 +29,7 @@
     "grammars": [
       {
         "language": "crs",
-        "scopeName": "source.crs",
+        "scopeName": "source.flour",
         "path": "./syntaxes/crs.tmLanguage.json"
       }
     ],

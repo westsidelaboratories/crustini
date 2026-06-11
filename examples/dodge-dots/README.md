@@ -1,8 +1,8 @@
 # Dodge Dots
 
-This example proves simple movement, collision checks, score state, and reset behavior.
+This runnable example proves simple movement, collision checks, score state, and reset behavior.
 
-It is written fully in `.flour`.
+The active language direction is [`../../new-spec.md`](../../new-spec.md). This example may still use compatibility syntax until the compiler catches up.
 
 ## Authored Files
 
@@ -28,26 +28,16 @@ Use arrows or click/hold the mouse to move.
 
 ## Compile Path
 
-`app.flour` contains:
-
-```txt
-screen!(180, 120)
-fps!(30)
-state! { player, dots, tick, score, hit }
-update! { input, movement, bounds, collisions, reset }
-draw! { clear, rect, text, line, circle }
-```
-
 `rx bake` generates:
 
 ```txt
 examples/dodge-dots/.bakery/
   Cargo.toml
   src/lib.rs
-  target/debug/libcrustini_generated_dodge_dots.rlib
+  target/
 ```
 
-Preview mode generates:
+Preview mode also generates:
 
 ```txt
 examples/dodge-dots/.bakery/preview/
@@ -55,7 +45,7 @@ examples/dodge-dots/.bakery/preview/
   src/main.rs
 ```
 
-The generated app crate is no-std and only depends on `crustini-core`. The native preview shell is separate.
+The generated app crate depends on `crustini-core`. The native preview shell is separate.
 
 ## Inspect
 

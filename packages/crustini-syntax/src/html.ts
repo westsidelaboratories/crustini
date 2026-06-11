@@ -5,7 +5,7 @@ const CLASS_BY_KIND: Record<CrsToken["kind"], string> = {
   comment: "crs-comment",
   string: "crs-string",
   number: "crs-number",
-  macro: "crs-macro",
+  compiler: "crs-compiler",
   keyword: "crs-keyword",
   declaration: "crs-declaration",
   type: "crs-type",

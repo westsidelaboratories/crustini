@@ -24,7 +24,7 @@ const result = await Bun.build({
    Usage:
    <link rel="stylesheet" href="themes/crustini-dark.css">
    <script src="dist/crustini-highlight.js"></script>
-   <pre class="crs-code"><code class="language-flour">app! { ... }</code></pre>
+   <pre class="crs-code"><code class="language-flour">app! Main { ... }</code></pre>
    <script>CrustiniHighlight.highlightAll();</script>
 */`,
 });

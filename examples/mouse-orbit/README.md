@@ -1,8 +1,8 @@
 # Mouse Orbit
 
-This example proves the basic mouse input path.
+This runnable example proves the basic mouse input path.
 
-The app is written fully in Crustini source. No Rust is hand-written for this example.
+The active language direction is [`../../new-spec.md`](../../new-spec.md). This example may still use compatibility syntax until the compiler catches up.
 
 ## Authored Files
 
@@ -28,26 +28,16 @@ Move the mouse around the window and click to change the animation.
 
 ## Compile Path
 
-`app.flour` contains:
-
-```txt
-screen!(180, 120)
-fps!(30)
-state! { x, y, pulse, shade, clicked }
-update! { mouse_x, mouse_y, mouse_down }
-draw! { clear, text, line, circle }
-```
-
 `rx bake` generates:
 
 ```txt
 examples/mouse-orbit/.bakery/
   Cargo.toml
   src/lib.rs
-  target/debug/libcrustini_generated_mouse_orbit.rlib
+  target/
 ```
 
-Preview mode generates:
+Preview mode also generates:
 
 ```txt
 examples/mouse-orbit/.bakery/preview/
@@ -55,7 +45,7 @@ examples/mouse-orbit/.bakery/preview/
   src/main.rs
 ```
 
-The compiler lowers `mouse_x`, `mouse_y`, and `mouse_down` into fields on `crustini_core::Buttons`.
+The compiler lowers mouse input into generated Rust that reads `crustini_core::Buttons`.
 
 ## Inspect
 

@@ -1,14 +1,78 @@
 # Basic Crustini Project
 
-This is the current simple project shape. It is intentionally small and Processing-like:
+The active language direction is [`../new-spec.md`](../new-spec.md).
+
+The beginner-facing project shape is one readable `.flour` file.
+
+```txt
+my-sketch/
+  main.flour
+```
+
+Run it from the folder:
 
 ```bash
 rx
 ```
 
-opens the native preview window when run inside a project directory.
+or from elsewhere:
 
-## File Tree
+```bash
+rx path/to/my-sketch/main.flour
+```
+
+## `main.flour`
+
+A starter `main.flour` should use TOML front matter plus normal Crustini source:
+
+```flour
++++
+crustini = "0.1"
+name = "Starter"
+fps = 30
+window = [640, 360]
++++
+
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    x += 2;
+    circle(x, 180, 24, Color::White);
+  }
+}
+```
+
+This is sketch mode. If `update()` is omitted, `draw()` may mutate state.
+
+As behavior grows, use app mode:
+
+```flour
+app! Main {
+  state {
+    x: number = 40;
+    speed: number = 120;
+  }
+
+  fn update() {
+    x += axis_x() * speed * dt();
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    rect(x, 100, 24, 24, Color::White);
+  }
+}
+```
+
+If `update()` exists, mutation belongs in `update()` and `draw()` should render the current state.
+
+## Compatibility Project Shape
+
+The current CLI still supports project-shaped apps with compatibility config:
 
 ```txt
 my-app/
@@ -20,124 +84,41 @@ my-app/
     generated/
 ```
 
-Only edit:
+Use this shape only when describing implementation behavior that exists today. Do not present it as the beginner default.
 
-- `recipe.flour`
-- `src/main.flour`
+Only edit authored files:
+
+- `.flour` source files
+- compatibility config when using the current project mode
 - files under `assets/`
 
-Do not edit `.crustini/generated/`. It is written by `rx`.
-
-## `recipe.flour`
-
-`recipe.flour` describes the project and preview surface.
-
-```flour
-project!:
-  name "hello-world"
-  version "0.1.0"
-
-screen!:
-  size 180, 120
-  fps 30
-
-preview!:
-  title "Hello World"
-  scale auto
-
-build!:
-  generated ".crustini/generated"
-```
-
-For now, this is the basic mode:
-
-- `project!` names the app.
-- `screen!` sets logical pixels and frame rate.
-- `preview!` sets the native preview window title and scale.
-- `build!` says where generated Rust goes.
-
-Accepted preview scales are `auto`, `1x`, `2x`, `4x`, and `8x`.
-
-## `src/main.flour`
-
-`src/main.flour` is the app source.
-
-```flour
-app! {
-  draw! {
-    clear!(8)
-    text!(42, 56, "HELLO WORLD", 255)
-  }
-}
-```
-
-In project mode, `screen!:` from `recipe.flour` supplies the size and fps, so the source can focus on app behavior.
+Do not edit generated Rust under `.bakery/` or `.crustini/generated/`.
 
 ## Commands
 
-Inside a project directory:
+Preview:
 
 ```bash
-rx
-```
-
-Open a project from elsewhere:
-
-```bash
-rx path/to/my-app
+rx app.flour
 ```
 
 Build the artifact without opening a window:
 
 ```bash
-rx bake .
+rx bake app.flour
 ```
 
 Validate without writing generated Rust:
 
 ```bash
-rx proof .
-```
-
-## Repo Checks
-
-In this repository, use one command before shipping changes:
-
-```bash
-bun run check
-```
-
-That runs Rust formatting, Rust checks, tests, clippy, TypeScript checks, site checks, and bakes fixtures/examples.
-
-Use this to build everything:
-
-```bash
-bun run build
-```
-
-Use this to run the default example:
-
-```bash
-bun run run:example
+rx proof app.flour
 ```
 
 ## Generation Boundary
 
-The source of truth is user-authored `.flour` plus `recipe.flour`.
+The source of truth is user-authored `.flour`.
 
-Generated Rust lives in:
-
-```txt
-.crustini/generated/
-```
-
-The native preview host lives in a generated sub-crate:
-
-```txt
-.crustini/generated/preview/
-```
-
-If generation needs to change:
+Generated Rust is implementation output. If generation needs to change:
 
 - `.flour` parsing and Rust emitting live in `crates/crustini-lang`.
 - `rx`, project config, starter writing, and bakery layout live in `crates/crustini`.

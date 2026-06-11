@@ -3,7 +3,7 @@ export type CrsTokenKind =
   | "comment"
   | "string"
   | "number"
-  | "macro"
+  | "compiler"
   | "keyword"
   | "declaration"
   | "type"
@@ -21,36 +21,29 @@ export type CrsToken = {
 
 export const CRS_KEYWORDS = new Set([
   "if", "else", "match", "true", "false", "let", "mut", "return",
-  "break", "continue", "for", "while", "in", "use", "as"
+  "break", "continue", "for", "while", "in"
 ]);
 
 export const CRS_DECLARATIONS = new Set([
-  "app", "name", "target", "display", "input", "button", "state",
-  "screen", "fps", "setup", "update", "draw", "on", "every", "const", "goto"
+  "state", "fn", "struct", "enum", "setup", "update", "draw"
 ]);
 
 export const CRS_TYPES = new Set([
-  "u8", "u16", "u32", "u64", "usize",
-  "i8", "i16", "i32", "i64", "isize",
-  "bool", "str", "char", "f32", "f64",
-  "rgb565", "rgb888", "mono"
+  "number", "text", "bool", "Vec2", "Color", "Button", "Sprite"
 ]);
 
 export const CRS_CONSTANTS = new Set([
-  "BLACK", "WHITE", "GRAY", "GREEN", "RED", "BLUE", "YELLOW",
-  "MAGENTA", "CYAN", "ON", "OFF",
-  "Main", "Run", "Wifi", "Info", "Settings",
-  "bold_12", "bold_16", "big", "small",
-  "landscape", "portrait",
-  "esp32_s3", "rp2040", "stm32",
-  "st7789", "ssd1306", "sh1106", "ili9341"
+  "Black", "White", "Gray", "Green", "Red", "Blue", "Yellow",
+  "Magenta", "Cyan",
+  "A", "B", "Left", "Right", "Up", "Down", "Start", "Select",
+  "Title", "Playing", "Dead"
 ]);
 
 export const CRS_BUILTINS = new Set([
-  "clear", "pixel", "line", "rect", "fill_rect", "circle",
-  "text", "bitmap", "sprite", "flush",
-  "progress", "menu", "card", "meter", "toggle", "slider",
-  "redraw", "min", "max", "clamp"
+  "clear", "line", "rect", "circle", "text", "sprite",
+  "vec2", "pressed", "down", "released", "axis_x", "axis_y",
+  "stick", "mouse_x", "mouse_y", "mouse_down", "dt",
+  "min", "max", "clamp", "abs", "hit_rect"
 ]);
 
 const isAlpha = (ch: string) => /[A-Za-z_]/.test(ch);
@@ -121,9 +114,15 @@ export function tokenizeCrsLine(line: string): CrsToken[] {
       const word = line.slice(i, j);
       const rest = line.slice(j);
 
-      if (rest.startsWith("!")) {
-        tokens.push({ kind: "macro", value: `${word}!` });
+      if (word === "app" && rest.startsWith("!")) {
+        tokens.push({ kind: "compiler", value: `${word}!` });
         i = j + 1;
+        continue;
+      }
+
+      if (rest.startsWith("!")) {
+        tokens.push({ kind: "identifier", value: word });
+        i = j;
         continue;
       }
 
@@ -157,7 +156,7 @@ export function tokenizeCrsLine(line: string): CrsToken[] {
         continue;
       }
 
-      if (/^\s*:/.test(rest)) {
+      if (/^\s*[:=]/.test(rest)) {
         tokens.push({ kind: "property", value: word });
         i = j;
         continue;
@@ -165,6 +164,13 @@ export function tokenizeCrsLine(line: string): CrsToken[] {
 
       tokens.push({ kind: "identifier", value: word });
       i = j;
+      continue;
+    }
+
+    const two = line.slice(i, i + 2);
+    if (["::", "==", "!=", "<=", ">=", "&&", "||", "+=", "-=", "->", "=>"].includes(two)) {
+      tokens.push({ kind: two === "::" ? "punctuation" : "operator", value: two });
+      i += 2;
       continue;
     }
 

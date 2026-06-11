@@ -14,14 +14,10 @@
 import { crsLanguage } from "@crustini/syntax/codemirror";
 
 const view = new EditorView({
-  doc: `app! {
-  name: "Demo"
-
-  screen Main {
-    draw {
-      clear(BLACK)
-      text(8, 8, "Hello", color: WHITE)
-    }
+  doc: `app! Main {
+  fn draw() {
+    clear(Color::Black);
+    text(24, 24, "hello", Color::White);
   }
 }`,
   extensions: [

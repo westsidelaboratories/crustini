@@ -1,60 +1,238 @@
 # Crustini
 
-Tiny app syntax that compiles into boring `#![no_std]` Rust.
+Crustini is a single-file-first creative coding language.
 
-Project vocabulary is intentionally small:
+Its language direction is:
 
 ```txt
-.flour source code
-rx     command
-recipe project config
-bake   compile/build
-bakery generated build workspace/cache
-starter project template
+Processing immediacy with Rust-shaped structure when the sketch grows up.
 ```
 
-Use plain words for everything else: artifact, diagnostics, logs, generated Rust. The current compiler accepts `.flour` source, keeps `.crst` as an old compatibility extension, and writes generated crates into `.bakery/`.
+Artists write `.flour` source. Crustini parses it, checks it, lowers it into generated Rust, and runs it through a lightweight native preview host.
 
-This is intentionally crude. It is not a serious compiler yet. It is a tiny macro-shaped parser + Rust string emitter.
+The active v0 language spec is [`new-spec.md`](new-spec.md).
 
-## Monorepo layout
+## Current Status
+
+This repository is in transition.
+
+The product direction is the new `.flour` syntax in [`new-spec.md`](new-spec.md):
+
+```flour
++++
+crustini = "0.1"
+name = "Sketch"
+fps = 30
+window = [640, 360]
++++
+
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    x += 2;
+    circle(x, 180, 24, Color::White);
+  }
+}
+```
+
+The current compiler is still smaller than that target. It accepts `.flour`, keeps `.crst` as an old compatibility extension, and still supports legacy implementation syntax in existing examples and fixtures. Treat that old surface as implementation compatibility, not the product direction.
+
+## Language Shape
+
+Crustini v0 has one language with three teaching modes.
+
+### Sketch Mode
+
+Sketch mode is the Processing-style entry point.
+
+```flour
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    x += 1;
+    rect(x, 100, 24, 24, Color::White);
+  }
+}
+```
+
+Rule:
 
 ```txt
-apps/site                 Astro website and docs tools
-crates/crustini           rx CLI, project config, bakery orchestration
-crates/crustini-lang      .flour parser, app model, diagnostics, Rust emitter
-crates/crustini-core      no_std runtime crate used by generated apps
-crates/crustini-host      native std preview host for easy-mode rx run
-crates/crustini-web-host  parked browser preview host experiment
-packages/crustini-syntax  TypeScript syntax highlighting package
-editors/vscode            VS Code language extension
-examples                  real runnable app examples
-fixtures                  compiler and CLI source fixtures
-scripts                   repo-level helper scripts
+If update() is omitted, draw() may mutate state.
+```
+
+This keeps the first experience immediate, visual, and forgiving.
+
+### App Mode
+
+App mode is the recommended shape once behavior becomes more than a tiny sketch.
+
+```flour
+app! Main {
+  state {
+    x: number = 40;
+    speed: number = 120;
+  }
+
+  fn update() {
+    x += axis_x() * speed * dt();
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    rect(x, 100, 24, 24, Color::White);
+  }
+}
+```
+
+Rule:
+
+```txt
+If update() exists, mutation belongs in update().
+draw() should be rendering-only except for short-lived local drawing calculations.
+```
+
+### Structured Mode
+
+Structured mode is for larger sketches, toys, and games.
+
+Use `struct`, `enum`, `match`, and helper functions:
+
+```flour
+enum Mode {
+  Title,
+  Playing,
+}
+
+app! Main {
+  state {
+    mode: Mode = Mode::Title;
+  }
+
+  fn update() {
+    if pressed(Button::A) {
+      mode = Mode::Playing;
+    }
+  }
+
+  fn draw() {
+    clear(Color::Black);
+
+    match mode {
+      Mode::Title => {
+        text(40, 40, "PRESS A", Color::White);
+      }
+
+      Mode::Playing => {
+        text(40, 40, "PLAYING", Color::Green);
+      }
+    }
+  }
+}
+```
+
+## Syntax Principles
+
+Keep `app! Main { ... }` as the visible compiler-level app form.
+
+Normal runtime work should use normal function calls:
+
+```flour
+clear(Color::Black);
+rect(x, y, 20, 20, Color::White);
+pressed(Button::A);
+dt();
+```
+
+Use `::` for named constants, enum variants, and assets:
+
+```flour
+Color::Black
+Button::A
+Sprite::Player
+Mode::Title
+```
+
+Use tiny beginner-facing primitive types:
+
+```txt
+number
+text
+bool
+```
+
+Do not expose imports, modules, generics, traits, lifetimes, references, or ownership syntax in the v0 user surface.
+
+## File Shape
+
+A canonical `.flour` file has optional TOML front matter and Crustini source code:
+
+```flour
++++
+crustini = "0.1"
+name = "Starter"
+fps = 30
+window = [640, 360]
++++
+
+app! Main {
+  fn draw() {
+    clear(Color::Black);
+    text(24, 24, "hello crustini", Color::White);
+  }
+}
+```
+
+Use plain `+++` delimiters. Do not write `+++ config` or `+++ sketch`.
+
+Starter files should include:
+
+```toml
+crustini = "0.1"
+name = "Starter"
+fps = 30
+window = [640, 360]
 ```
 
 ## Vocabulary
 
-The naming guide lives in [`docs/toolchain-vocabulary.md`](docs/toolchain-vocabulary.md).
-The basic project spec lives in [`docs/basic-project.md`](docs/basic-project.md).
-The language macro layout lives in [`docs/language-macros.md`](docs/language-macros.md).
-The early target-shape spec lives in [`docs/target-spec/`](docs/target-spec/).
-The source-sharing principle lives in [`docs/source-first-code-sharing.md`](docs/source-first-code-sharing.md).
-The examples compile walkthrough lives in [`examples/compiling.md`](examples/compiling.md).
+Project vocabulary is intentionally small.
 
-Short mapping:
-
-| Product term | Meaning today |
+| Product term | Meaning |
 | --- | --- |
 | `.flour` | Source extension for user-authored Crustini apps. |
-| `rx` | Short command for running, baking, and emitting Crustini apps. |
-| `recipe.flour` | Project config for multi-file apps. |
+| `rx` | Short command for running, proofing, baking, and emitting Crustini apps. |
+| `main.flour` | Product-direction default file for a one-file sketch folder. |
+| `recipe.flour` | Current compatibility project config for project-shaped apps. |
 | `proof` | Check/validate source without writing a bakery or building. |
 | `bake` | Build/compile action; `build` remains a compatibility alias. |
 | `bakery` | Generated build workspace/cache; current directory is `.bakery/`. |
 | `starter` | Project template. |
 
+Use plain words for artifact, diagnostics, logs, generated Rust, and runtime.
+
+The dense naming guide lives in [`docs/toolchain-vocabulary.md`](docs/toolchain-vocabulary.md).
+
 ## Shape
+
+Product direction:
+
+```txt
+.flour source
+  -> Crustini compiler
+  -> generated Rust
+  -> lightweight native desktop app
+```
+
+Current implementation shape:
 
 ```txt
 rx app.flour
@@ -66,14 +244,7 @@ rx bake app.flour
   -> artifact only
 ```
 
-Current implementation shape:
-
-```txt
-.flour source
-  -> crustini-lang compiler
-  -> generated no_std Rust crate in .bakery/
-  -> rx runs native host for preview or cargo build for bake
-```
+For current project-shaped compatibility mode, `recipe.flour` plus `src/main.flour` can write generated Rust under `.crustini/generated/`.
 
 ## Run An App
 
@@ -89,10 +260,16 @@ After installing `rx`, that becomes:
 rx examples/brick-breaker/app.flour
 ```
 
-Inside a project directory with `recipe.flour`, a bare `rx` opens that project:
+Inside a current project directory with `recipe.flour`, a bare `rx` opens that project:
 
 ```bash
 rx
+```
+
+Use `proof` to check source without writing a bakery:
+
+```bash
+rx proof examples/brick-breaker/app.flour
 ```
 
 Use `bake` when you only want the generated artifact:
@@ -101,15 +278,23 @@ Use `bake` when you only want the generated artifact:
 rx bake examples/brick-breaker/app.flour
 ```
 
-## Build the compiler
+Emit generated Rust to stdout:
+
+```bash
+rx emit examples/brick-breaker/app.flour
+```
+
+For headless checks and CI, set `CRUSTINI_FRAME=1`. That runs one frame through the preview host and writes a `frame.ppm` under the app bakery.
+
+## Build
+
+Build the Rust crates:
 
 ```bash
 cargo build
 ```
 
-## Repo commands
-
-The root Bun workspace is the command layer for the whole repo. Cargo stays focused on Rust crates.
+The root Bun workspace is the command layer for the whole repo:
 
 ```bash
 bun run ci
@@ -121,9 +306,9 @@ bun run clean
 bun run port:clean 4321
 ```
 
-Command flow lives in `scripts/*.ts`; `package.json` is just the command menu. The shell scripts in `scripts/*.sh` are compatibility wrappers.
+Command flow lives in `scripts/*.ts`; `package.json` is the command menu. The shell scripts in `scripts/*.sh` are compatibility wrappers.
 
-## Build the site
+## Build the Site
 
 ```bash
 bun install
@@ -132,21 +317,15 @@ bun run site:dev
 
 The Astro site lives in `apps/site` and imports the shared syntax package from `packages/crustini-syntax`.
 
-## Create a starter
+## Create a Starter
+
+Current starters still use the compatibility project shape:
 
 ```bash
 cargo run --bin rx -- starter hello my-hello
 cargo run --bin rx -- my-hello
-cargo run --bin rx -- my-hello/app.flour
 cargo run --bin rx -- proof my-hello
 cargo run --bin rx -- bake my-hello
-```
-
-The older counter starter is still available:
-
-```bash
-cargo run --bin rx -- starter counter my-counter
-cargo run --bin rx -- my-counter
 ```
 
 List starters with:
@@ -155,78 +334,7 @@ List starters with:
 cargo run --bin rx -- starters
 ```
 
-## Hello world
-
-```flour
-app! {
-  screen!(128, 64)
-  fps!(30)
-
-  setup! {
-    clear!(0)
-  }
-
-  draw! {
-    clear!(0)
-    text!(28, 24, "HELLO WORLD!", 255)
-  }
-}
-```
-
-What each part does:
-
-| Source | Meaning |
-| --- | --- |
-| `app!` | Root macro for one Crustini app. |
-| `screen!(128, 64)` | Sets the framebuffer size constants in generated Rust. |
-| `fps!(30)` | Sets the app frame-rate constant. |
-| `setup!` | Runs once before the frame loop; this starter clears the screen. |
-| `draw!` | Runs when rendering; this starter clears and draws text. |
-| `clear!(0)` | Calls `Screen::clear` in the no-std runtime. |
-| `text!(28, 24, "HELLO WORLD!", 255)` | Calls `Screen::text` with a tiny built-in bitmap font. |
-
-Current basic macro set:
-
-| Macro | Where | Meaning |
-| --- | --- | --- |
-| `app!` | root | One app source unit. |
-| `screen!(WIDTH, HEIGHT)` | app | Framebuffer size. |
-| `fps!(FPS)` | app | Frame-rate constant. |
-| `state!` | app | App-owned fields. |
-| `setup!` | app | Runs once before frames. |
-| `update!` | app | Owns mutation and input handling. |
-| `draw!` | app | Draws the current frame. |
-| `if CONDITION` | blocks | Conditional statements. |
-| `NAME = EXPR` | blocks | State assignment. |
-| `clear!(COLOR)` | setup/draw | Fill the screen. |
-| `set!(X, Y, COLOR)` | setup/draw | Set one pixel. |
-| `pixel!(X, Y, COLOR)` | setup/draw | Alias for `set!`. |
-| `rect!(X, Y, W, H, COLOR)` | setup/draw | Filled rectangle. |
-| `circle!(X, Y, R, COLOR)` | setup/draw | Filled circle. |
-| `line!(X0, Y0, X1, Y1, COLOR)` | setup/draw | Line. |
-| `text!(X, Y, "TEXT", COLOR)` | setup/draw | Tiny bitmap text. |
-| `clamp!(VALUE, MIN, MAX)` | expressions | Lowers to `crustini_core::clamp_i16`. |
-| `hit_rect!(AX, AY, AW, AH, BX, BY, BW, BH)` | expressions | Axis-aligned rectangle collision. |
-| `abs!(VALUE)` | expressions | Lowers to `crustini_core::abs_i16`. |
-| `min!(A, B)` | expressions | Lowers to `core::cmp::min`. |
-| `max!(A, B)` | expressions | Lowers to `core::cmp::max`. |
-
-Current basic input names are available in `update!`:
-
-| Name | Meaning |
-| --- | --- |
-| `up`, `down`, `left`, `right` | Direction buttons. In preview, arrow keys and WASD. |
-| `a`, `b` | Action buttons. In preview, Space/Z and Enter/X. |
-| `start`, `select` | Menu buttons. In preview, Enter and Right Shift/Backspace. |
-| `mouse_x`, `mouse_y` | Mouse position in preview window coordinates. |
-| `mousex`, `mousey` | Short aliases for `mouse_x` and `mouse_y`. |
-| `mouse_down` | Left mouse button state. |
-
-The `fixtures/apps/all-macros/app.flour` fixture covers that whole basic set.
-
-## Project shape
-
-Project starters use `recipe.flour` and keep source under `src/`:
+The current compatibility project layout is:
 
 ```txt
 my-hello/
@@ -238,141 +346,48 @@ my-hello/
     generated/
 ```
 
-The current restricted `recipe.flour` blocks are:
+The product direction is simpler for beginners:
 
 ```txt
-project!:
-target!:
-screen!:
-memory!:
-buttons!:
-preview!:
-assets!:
-build!:
+my-sketch/
+  main.flour
 ```
 
-The optional `preview!:` block configures the local preview surface used by `rx run`; it is not part of the `.flour` language:
+Do not silently rename implementation paths until the CLI supports that shape.
 
-```flour
-preview!:
-  title "Tiny Demo"
-  scale auto
-```
-
-Accepted scales are `auto`, `1x`, `2x`, `4x`, and `8x`.
-
-`fixtures/projects/hood-wars` is the first project-shaped fixture:
-
-```bash
-cargo run --bin rx -- proof fixtures/projects/hood-wars
-cargo run --bin rx -- bake fixtures/projects/hood-wars
-cargo run --bin rx -- fixtures/projects/hood-wars
-```
-
-The bake path is still intentionally simple:
+## Monorepo Layout
 
 ```txt
-fixtures/apps/bounce/app.flour
-  -> crustini-lang parser and Rust emitter
-  -> generated no_std Rust in fixtures/apps/bounce/.bakery/src/lib.rs
-  -> rx runs cargo build
-  -> fixtures/apps/bounce/.bakery/target/debug/libcrustini_generated_bounce.rlib
+apps/site                 Astro website and docs tools
+crates/crustini           rx CLI, project config, bakery orchestration
+crates/crustini-lang      .flour parser, app model, diagnostics, Rust emitter
+crates/crustini-core      no_std runtime crate used by generated apps
+crates/crustini-host      native std preview host for easy-mode rx run
+crates/crustini-web-host  parked browser preview host experiment
+packages/crustini-syntax  TypeScript syntax highlighting package
+editors/vscode            VS Code language extension
+examples                  real runnable app examples
+fixtures                  compiler and CLI source fixtures
+scripts                   repo-level helper scripts
 ```
 
-For the most basic visible output, use `run`:
+## Related Docs
 
-```bash
-cargo run --bin rx -- examples/brick-breaker/app.flour
-```
+- [`new-spec.md`](new-spec.md): active v0 language direction.
+- [`AGENTS.md`](AGENTS.md): repository instructions for agents.
+- [`docs/toolchain-vocabulary.md`](docs/toolchain-vocabulary.md): naming and lifecycle notes.
+- [`docs/basic-project.md`](docs/basic-project.md): current simple project shape.
+- [`docs/compatibility-parser.md`](docs/compatibility-parser.md): current compatibility parser layout.
+- [`docs/target-spec/`](docs/target-spec/): early target-shape notes.
+- [`docs/source-first-code-sharing.md`](docs/source-first-code-sharing.md): source-sharing principle.
+- [`examples/compiling.md`](examples/compiling.md): current compile walkthrough.
 
-That is the same as `rx run examples/brick-breaker/app.flour` after installing the tool. It bakes the app library, writes a separate preview host under `.bakery/preview/`, opens a native window, and runs the app loop using the declared `screen!(WIDTH, HEIGHT)` and `fps!(FPS)`.
+## What This Does Not Have Yet
 
-For headless checks and CI, set `CRUSTINI_FRAME=1`. That runs one frame through the separate preview host and writes:
-
-```txt
-examples/brick-breaker/.bakery/frame.ppm
-```
-
-Project output uses `.crustini/generated` from `recipe.flour`:
-
-```txt
-fixtures/projects/hood-wars/
-  recipe.flour
-  src/main.flour
-  .crustini/generated/
-    Cargo.toml
-    src/lib.rs
-    preview/
-    frame.ppm
-```
-
-## Generate and build the bounce fixture
-
-```bash
-cargo run --bin rx -- bake fixtures/apps/bounce/app.flour
-cargo build --manifest-path fixtures/apps/bounce/.bakery/Cargo.toml
-```
-
-## Check without writing a bakery
-
-```bash
-cargo run --bin rx -- proof fixtures/apps/all-macros/app.flour
-```
-
-## Emit generated Rust to stdout
-
-```bash
-cargo run --bin rx -- emit fixtures/apps/bounce/app.flour
-```
-
-## Crustini syntax currently supported
-
-```flour
-app! {
-  screen!(240, 135)
-  fps!(30)
-
-  state! {
-    x: i16 = 120
-    y: i16 = 67
-    vx: i16 = 1
-  }
-
-  setup! {
-    clear!(0)
-  }
-
-  update! {
-    x = x + vx
-    x = clamp!(x, 8, 232)
-
-    if hit_rect!(x - 8, y - 8, 16, 16, 220, 48, 12, 12) {
-      vx = -1
-    }
-
-    if x == 8 {
-      vx = abs!(vx)
-    }
-
-    if x == 232 {
-      vx = 0 - abs!(vx)
-    }
-  }
-
-  draw! {
-    clear!(12)
-    circle!(x, y, 8, 255)
-    text!(8, 8, "HI", 255)
-  }
-}
-```
-
-## What this does not have yet
-
+- no full parser for the complete new v0 spec
 - no LSP
 - no tree-sitter
 - no formatter
-- no parser generator
 - no package manager
 - no imports
 - no modules
@@ -382,5 +397,5 @@ app! {
 The point of this repo is to prove this path:
 
 ```txt
-simple Crustini source -> generated no_std Rust compiles
+simple Crustini source -> generated Rust compiles -> native preview runs
 ```

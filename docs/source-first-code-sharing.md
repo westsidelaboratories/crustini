@@ -47,6 +47,6 @@ For multi-file source bundles, the same rule applies: the command may be conveni
 ## Open Questions
 
 - Where should copied shared source live: `src/`, `shared/`, or another plain directory?
-- Should provenance live in `recipe.flour`, beside the copied files, or both?
+- Should provenance live in front matter, beside the copied files, or both?
 - How should `rx add` present diffs when updating copied source?
 - Should Crustini allow remote source only when it can show the exact fetched files and hashes first?

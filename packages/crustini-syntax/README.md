@@ -1,48 +1,71 @@
 # `@crustini/syntax`
 
-Permanent syntax highlighting kit for Crustini source files.
+Syntax highlighting kit for Crustini source files.
 
-Crustini source uses `.flour` for user-authored files. This package still has `.crs` names in tokenizer classes and TextMate scopes because those are current implementation names. Treat `.crs` as transitional syntax-package naming and `.flour` as the source file UX.
+The active source language direction is [`../../new-spec.md`](../../new-spec.md). `.flour` is the user-authored file extension.
 
-This is intentionally small and dependency-light. It gives you the same visual language in every place you care about:
+Some implementation names still contain `crs` because the syntax package predates the `.flour` naming pass. Treat those as transitional package internals, not user-facing vocabulary.
 
-- standalone browser rendering
-- docs pages / Astro / Svelte / raw HTML
-- CodeMirror editor integration
-- TextMate grammar for VS Code and Shiki
-- Prism integration
-- Highlight.js integration
+## What To Highlight
 
-## Recommended source of truth
+The new Crustini surface should make these categories visually distinct:
 
-The source of truth should be:
+- compiler form: `app! Main`
+- declarations: `state`, `fn`, `struct`, `enum`
+- control flow: `if`, `else`, `for`, `match`, `return`
+- types: `number`, `text`, `bool`, `Vec2`, `Color`, `Button`, `Sprite`
+- namespaced constants and variants: `Color::Black`, `Button::A`, `Mode::Title`
+- builtin calls: `clear(...)`, `rect(...)`, `pressed(...)`, `dt()`
+- strings, numbers, comments, punctuation, and operators
+
+Example source:
+
+```flour
++++
+crustini = "0.1"
+name = "Sketch"
+fps = 30
+window = [640, 360]
++++
+
+app! Main {
+  state {
+    x: number = 40;
+  }
+
+  fn draw() {
+    clear(Color::Black);
+    x += 2;
+    circle(x, 180, 24, Color::White);
+  }
+}
+```
+
+## Recommended Source of Truth
+
+Keep tokenizer and grammar behavior aligned:
 
 ```txt
 src/crs-tokenizer.ts
 grammars/crs.tmLanguage.json
 ```
 
-The tokenizer powers your own app/docs renderer.
+The tokenizer powers app/docs rendering.
 
 The TextMate grammar powers VS Code and Shiki-style renderers.
 
-## Plain browser usage
+When the package internals migrate from `crs` naming, keep compatibility aliases for existing integrations.
+
+## Plain Browser Usage
 
 ```html
 <link rel="stylesheet" href="/themes/crustini-dark.css" />
 <script src="/dist/crustini-highlight.js"></script>
 
-<pre class="crs-code"><code class="language-flour">app! {
-  screen!(240, 135)
-  fps!(30)
-
-  state! {
-    count: i32 = 0
-  }
-
-  draw! {
-    clear!(0)
-    rect!(8, 8, 80, 24, 12)
+<pre class="crs-code"><code class="language-flour">app! Main {
+  fn draw() {
+    clear(Color::Black);
+    text(24, 24, "hello", Color::White);
   }
 }</code></pre>
 
@@ -59,16 +82,17 @@ bun --filter @crustini/syntax build:browser
 
 That writes `dist/crustini-highlight.js` and syncs the static copy used by the site live editor.
 
-## CodeMirror usage
+## CodeMirror Usage
 
 ```ts
 import { EditorView, basicSetup } from "codemirror";
 import { crsLanguage } from "@crustini/syntax/codemirror";
 
 new EditorView({
-  doc: `app! {
-  screen!(240, 135)
-  fps!(30)
+  doc: `app! Main {
+  fn draw() {
+    clear(Color::Black);
+  }
 }`,
   extensions: [
     basicSetup,
@@ -78,7 +102,7 @@ new EditorView({
 });
 ```
 
-## VS Code usage
+## VS Code Usage
 
 Copy the `vscode-extension` folder into an extension project, then package/publish it later.
 
@@ -97,7 +121,7 @@ vscode-extension/syntaxes/crs.tmLanguage.json
 vscode-extension/snippets/crs.code-snippets
 ```
 
-## Shiki usage
+## Shiki Usage
 
 Shiki uses TextMate grammars. Use:
 
@@ -108,45 +132,17 @@ grammars/crs.tmLanguage.json
 as the Crustini grammar with scope:
 
 ```txt
-source.crs
+source.flour
 ```
 
-When the `.flour` migration reaches syntax tooling, add `source.flour` while keeping `source.crs` as a compatibility alias for existing integrations.
+## CSS Classes
 
-## Syntax classes
+The standalone HTML highlighter scans `language-flour` and `language-crustini` blocks.
 
-The standalone HTML highlighter scans `language-flour`, `language-crustini`, and old `language-crs` blocks. It emits:
-
-```txt
-.crs-macro
-.crs-declaration
-.crs-keyword
-.crs-type
-.crs-constant
-.crs-builtin
-.crs-property
-.crs-string
-.crs-number
-.crs-comment
-.crs-punctuation
-.crs-operator
-```
-
-Theme them in:
+Theme output in:
 
 ```txt
 themes/crustini-dark.css
 ```
 
-## Strategy
-
-Do not make syntax highlighting depend on the Crustini compiler yet.
-
-Keep the highlighter forgiving and lexical:
-
-```txt
-syntax highlighter = fast lexical tokenizer
-compiler/parser    = real semantic parser
-```
-
-Later, once the `.flour` grammar hardens, replace the CodeMirror stream mode with a real Lezer grammar and keep compatibility aliases for existing `.crs` integrations.
+Current class names are implementation API and may still use `crs` prefixes during the transition.

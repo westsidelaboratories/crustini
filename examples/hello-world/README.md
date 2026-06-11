@@ -1,8 +1,8 @@
 # Hello World
 
-This is the smallest project-shaped Crustini starter.
+This is the smallest current project-shaped starter.
 
-Unlike the single-file examples, this folder uses `recipe.flour` plus `src/main.flour`.
+The active language direction is [`../../new-spec.md`](../../new-spec.md). Product-facing beginner projects should move toward one `main.flour` file with front matter. This example still uses the current compatibility project layout.
 
 ## Authored Files
 
@@ -13,16 +13,7 @@ examples/hello-world/
   README.md
 ```
 
-`recipe.flour` describes the project:
-
-- name
-- version
-- screen size
-- fps
-- native preview title
-- generated output directory
-
-`src/main.flour` is the original app source.
+`recipe.flour` is compatibility project config. `src/main.flour` is the authored app source.
 
 ## Run
 
@@ -56,13 +47,13 @@ Inside this directory:
 rx bake .
 ```
 
-This writes the generated app crate to the directory chosen in `recipe.flour`:
+This writes the generated app crate to the directory chosen by compatibility config:
 
 ```txt
 examples/hello-world/.crustini/generated/
   Cargo.toml
   src/lib.rs
-  target/debug/libcrustini_generated_hello_world.rlib
+  target/
 ```
 
 Preview mode also writes:
@@ -71,25 +62,6 @@ Preview mode also writes:
 examples/hello-world/.crustini/generated/preview/
   Cargo.toml
   src/main.rs
-```
-
-## What Compiles To What
-
-`recipe.flour` supplies:
-
-```txt
-screen size 180, 120
-fps 30
-preview title "Hello World"
-generated ".crustini/generated"
-```
-
-`src/main.flour` supplies:
-
-```txt
-state!  -> Rust App fields
-update! -> CrustiniApp::update
-draw!   -> CrustiniApp::draw
 ```
 
 The generated Rust app depends on `crustini-core`. The native preview depends on `crustini-host`.

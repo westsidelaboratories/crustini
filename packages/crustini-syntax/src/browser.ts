@@ -10,7 +10,6 @@ export type CrsHighlightOptions = {
 export const DEFAULT_CRS_SELECTOR = [
   "code.language-flour",
   "code.language-crustini",
-  "code.language-crs",
   "pre.crs-code > code",
 ].join(", ");
 

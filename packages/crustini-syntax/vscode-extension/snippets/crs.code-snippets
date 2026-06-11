@@ -1,42 +1,54 @@
 {
-  "app": {
+  "Crustini sketch": {
+    "prefix": "sketch",
+    "body": [
+      "+++",
+      "crustini = \"0.1\"",
+      "name = \"${1:Sketch}\"",
+      "fps = 30",
+      "window = [640, 360]",
+      "+++",
+      "",
+      "app! Main {",
+      "  state {",
+      "    x: number = 40;",
+      "  }",
+      "",
+      "  fn draw() {",
+      "    clear(Color::Black);",
+      "    x += 2;",
+      "    circle(x, 180, 24, Color::White);",
+      "  }",
+      "}"
+    ],
+    "description": "Processing-style Crustini sketch"
+  },
+  "Crustini app": {
     "prefix": "app",
     "body": [
-      "app! {",
-      "  name: \"$1\"",
+      "+++",
+      "crustini = \"0.1\"",
+      "name = \"${1:App}\"",
+      "fps = 30",
+      "window = [640, 360]",
+      "+++",
       "",
-      "  target: esp32_s3",
-      "",
-      "  display: st7789 {",
-      "    width: 240",
-      "    height: 135",
-      "    color: rgb565",
-      "  }",
-      "",
+      "app! Main {",
       "  state {",
-      "    selected: u8 = 0",
+      "    x: number = 40;",
+      "    speed: number = 120;",
       "  }",
       "",
-      "  screen Main {",
-      "    draw {",
-      "      clear(BLACK)",
-      "      text(8, 8, \"$2\", color: WHITE)",
-      "    }",
+      "  fn update() {",
+      "    x += axis_x() * speed * dt();",
+      "  }",
+      "",
+      "  fn draw() {",
+      "    clear(Color::Black);",
+      "    rect(x, 100, 24, 24, Color::White);",
       "  }",
       "}"
     ],
-    "description": "Crustini app root"
-  },
-  "screen": {
-    "prefix": "screen",
-    "body": [
-      "screen ${1:Main} {",
-      "  draw {",
-      "    clear(BLACK)",
-      "    text(8, 8, \"$2\", color: WHITE)",
-      "  }",
-      "}"
-    ],
-    "description": "Crustini screen"
+    "description": "Structured Crustini update/draw app"
   }
 }

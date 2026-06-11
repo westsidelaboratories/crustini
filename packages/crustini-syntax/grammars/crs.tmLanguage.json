@@ -1,48 +1,43 @@
 {
-  "scopeName": "source.crs",
+  "scopeName": "source.flour",
   "name": "Crustini",
   "fileTypes": [
-    "crs"
+    "flour",
+    "crst"
   ],
   "patterns": [
-    {
-      "include": "#comments"
-    },
-    {
-      "include": "#strings"
-    },
-    {
-      "include": "#macro"
-    },
-    {
-      "include": "#numbers"
-    },
-    {
-      "include": "#declarations"
-    },
-    {
-      "include": "#keywords"
-    },
-    {
-      "include": "#types"
-    },
-    {
-      "include": "#constants"
-    },
-    {
-      "include": "#builtins"
-    },
-    {
-      "include": "#properties"
-    },
-    {
-      "include": "#operators"
-    },
-    {
-      "include": "#punctuation"
-    }
+    { "include": "#frontMatter" },
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#compilerForm" },
+    { "include": "#numbers" },
+    { "include": "#declarations" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#paths" },
+    { "include": "#constants" },
+    { "include": "#builtins" },
+    { "include": "#properties" },
+    { "include": "#operators" },
+    { "include": "#punctuation" }
   ],
   "repository": {
+    "frontMatter": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.frontmatter.crs",
+          "match": "^\\+\\+\\+$"
+        },
+        {
+          "name": "variable.other.property.toml.crs",
+          "match": "\\b(?:crustini|name|fps|window|code)\\b(?=\\s*=)"
+        },
+        {
+          "name": "entity.name.section.toml.crs",
+          "match": "^\\s*\\[[A-Za-z_][A-Za-z0-9_]*\\]\\s*$"
+        }
+      ]
+    },
     "comments": {
       "patterns": [
         {
@@ -66,11 +61,11 @@
         }
       ]
     },
-    "macro": {
+    "compilerForm": {
       "patterns": [
         {
-          "name": "entity.name.function.macro.crs",
-          "match": "\\b[A-Za-z_][A-Za-z0-9_]*!"
+          "name": "entity.name.function.compiler-form.crs",
+          "match": "\\bapp!"
         }
       ]
     },
@@ -78,7 +73,7 @@
       "patterns": [
         {
           "name": "constant.numeric.crs",
-          "match": "\\b\\d[\\d_]*(?:\\.\\d[\\d_]*)?(?:ms|%)?\\b"
+          "match": "\\b\\d[\\d_]*(?:\\.\\d[\\d_]*)?\\b"
         }
       ]
     },
@@ -86,7 +81,7 @@
       "patterns": [
         {
           "name": "storage.type.declaration.crs",
-          "match": "\\b(?:app|name|target|display|input|button|state|screen|fps|setup|update|draw|on|every|const|goto)\\b"
+          "match": "\\b(?:state|fn|struct|enum|setup|update|draw)\\b"
         }
       ]
     },
@@ -94,7 +89,7 @@
       "patterns": [
         {
           "name": "keyword.control.crs",
-          "match": "\\b(?:if|else|match|let|mut|return|break|continue|for|while|in|use|as)\\b"
+          "match": "\\b(?:if|else|match|let|mut|return|break|continue|for|while|in)\\b"
         },
         {
           "name": "constant.language.boolean.crs",
@@ -106,7 +101,19 @@
       "patterns": [
         {
           "name": "support.type.crs",
-          "match": "\\b(?:u8|u16|u32|u64|usize|i8|i16|i32|i64|isize|bool|str|char|f32|f64|rgb565|rgb888|mono)\\b"
+          "match": "\\b(?:number|text|bool|Vec2|Color|Button|Sprite)\\b"
+        }
+      ]
+    },
+    "paths": {
+      "patterns": [
+        {
+          "name": "constant.other.path.crs",
+          "match": "\\b[A-Z][A-Za-z0-9_]*(?=::)"
+        },
+        {
+          "name": "constant.other.variant.crs",
+          "match": "(?<=::)[A-Z][A-Za-z0-9_]*\\b"
         }
       ]
     },
@@ -114,7 +121,7 @@
       "patterns": [
         {
           "name": "constant.other.crs",
-          "match": "\\b(?:BLACK|WHITE|GRAY|GREEN|RED|BLUE|YELLOW|MAGENTA|CYAN|ON|OFF|bold_12|bold_16|big|small|landscape|portrait|esp32_s3|rp2040|stm32|st7789|ssd1306|sh1106|ili9341)\\b"
+          "match": "\\b(?:Black|White|Gray|Green|Red|Blue|Yellow|Magenta|Cyan|A|B|Left|Right|Up|Down|Start|Select|Title|Playing|Dead)\\b"
         }
       ]
     },
@@ -122,7 +129,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.crs",
-          "match": "\\b(?:clear|pixel|line|rect|fill_rect|circle|text|bitmap|sprite|flush|progress|menu|card|meter|toggle|slider|redraw|min|max|clamp)\\b"
+          "match": "\\b(?:clear|line|rect|circle|text|sprite|vec2|pressed|down|released|axis_x|axis_y|stick|mouse_x|mouse_y|mouse_down|dt|min|max|clamp|abs|hit_rect)\\b"
         }
       ]
     },
@@ -130,7 +137,7 @@
       "patterns": [
         {
           "name": "variable.other.property.crs",
-          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*:)"
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*[:=])"
         }
       ]
     },
@@ -138,7 +145,7 @@
       "patterns": [
         {
           "name": "keyword.operator.crs",
-          "match": "[=+\\-*/%<>!|&]+"
+          "match": "(?:==|!=|<=|>=|&&|\\|\\||\\+=|-=|->|=>|[=+\\-*/%<>!&|])"
         }
       ]
     },
@@ -146,7 +153,7 @@
       "patterns": [
         {
           "name": "punctuation.separator.crs",
-          "match": "[{}\\[\\](),:.]"
+          "match": "(?:::|[{}\\[\\](),:.])"
         }
       ]
     }

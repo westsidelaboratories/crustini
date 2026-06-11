@@ -5,34 +5,28 @@ const words = (items: string[]) => new Set(items);
 
 const keywords = words([
   "if", "else", "match", "true", "false", "let", "mut", "return",
-  "break", "continue", "for", "while", "in", "use", "as"
+  "break", "continue", "for", "while", "in"
 ]);
 
 const declarations = words([
-  "app", "name", "target", "display", "input", "button", "state",
-  "screen", "fps", "setup", "update", "draw", "on", "every", "const", "goto"
+  "state", "fn", "struct", "enum", "setup", "update", "draw"
 ]);
 
 const types = words([
-  "u8", "u16", "u32", "u64", "usize",
-  "i8", "i16", "i32", "i64", "isize",
-  "bool", "str", "char", "f32", "f64",
-  "rgb565", "rgb888", "mono"
+  "number", "text", "bool", "Vec2", "Color", "Button", "Sprite"
 ]);
 
 const constants = words([
-  "BLACK", "WHITE", "GRAY", "GREEN", "RED", "BLUE", "YELLOW",
-  "MAGENTA", "CYAN", "ON", "OFF",
-  "bold_12", "bold_16", "big", "small",
-  "landscape", "portrait", "esp32_s3", "rp2040", "stm32",
-  "st7789", "ssd1306", "sh1106", "ili9341"
+  "Black", "White", "Gray", "Green", "Red", "Blue", "Yellow",
+  "Magenta", "Cyan", "A", "B", "Left", "Right", "Up", "Down",
+  "Start", "Select", "Title", "Playing", "Dead"
 ]);
 
 const builtins = words([
-  "clear", "pixel", "line", "rect", "fill_rect", "circle",
-  "text", "bitmap", "sprite", "flush",
-  "progress", "menu", "card", "meter", "toggle", "slider",
-  "redraw", "min", "max", "clamp"
+  "clear", "line", "rect", "circle", "text", "sprite",
+  "vec2", "pressed", "down", "released", "axis_x", "axis_y",
+  "stick", "mouse_x", "mouse_y", "mouse_down", "dt",
+  "min", "max", "clamp", "abs", "hit_rect"
 ]);
 
 const parser: StreamParser<{}> = {
@@ -40,6 +34,8 @@ const parser: StreamParser<{}> = {
 
   token(stream) {
     if (stream.eatSpace()) return null;
+
+    if (stream.sol() && stream.match("+++")) return "meta";
 
     if (stream.match("//")) {
       stream.skipToEnd();
@@ -59,7 +55,7 @@ const parser: StreamParser<{}> = {
     }
 
     if (stream.match(/[0-9][0-9_]*/, true)) {
-      stream.match(/(\.[0-9_]+)?(ms|%)?/, true);
+      stream.match(/(\.[0-9_]+)?/, true);
       return "number";
     }
 
@@ -71,6 +67,7 @@ const parser: StreamParser<{}> = {
         return "meta";
       }
 
+      if (/^\s*=/.test(stream.string.slice(stream.pos))) return "propertyName";
       if (declarations.has(word)) return "keyword";
       if (keywords.has(word)) return "keyword";
       if (types.has(word)) return "typeName";
@@ -78,13 +75,13 @@ const parser: StreamParser<{}> = {
       if (builtins.has(word)) return "function(variableName)";
 
       const rest = stream.string.slice(stream.pos);
-      if (/^\s*:/.test(rest)) return "propertyName";
+      if (/^\s*[:=]/.test(rest)) return "propertyName";
 
       return "variableName";
     }
 
     if (stream.match(/[{}[\](),:.]/, true)) return "punctuation";
-    if (stream.match(/[=+\-*/%<>!|&]+/, true)) return "operator";
+    if (stream.match(/(==|!=|<=|>=|&&|\|\||\+=|-=|->|=>|[=+\-*/%<>!|&]+)/, true)) return "operator";
 
     stream.next();
     return null;
