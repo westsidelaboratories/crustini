@@ -315,7 +315,7 @@ fn write_bakery(input: &Path, include_preview: bool) -> Result<BakeryOutput, Str
     let rust = compile_to_rust(&src)?;
 
     let input_dir = input.parent().unwrap_or_else(|| Path::new("."));
-    let out_dir = input_dir.join(BAKERY_DIR);
+    let out_dir = single_file_bakery_dir(input_dir, input);
     let src_dir = out_dir.join("src");
 
     fs::create_dir_all(&src_dir)
@@ -691,10 +691,7 @@ fn title_from_slug(slug: &str) -> String {
 }
 
 fn generated_package_name(input: &Path) -> String {
-    let stem = input
-        .parent()
-        .and_then(|p| p.file_name())
-        .or_else(|| input.file_stem())
+    let stem = source_file_output_name(input)
         .and_then(|s| s.to_str())
         .unwrap_or("app");
 
@@ -707,6 +704,20 @@ fn generated_package_name(input: &Path) -> String {
         }
     }
     out
+}
+
+fn single_file_bakery_dir(input_dir: &Path, input: &Path) -> PathBuf {
+    match input.file_stem().and_then(|name| name.to_str()) {
+        Some("app") | Some("main") | None => input_dir.join(BAKERY_DIR),
+        Some(stem) => input_dir.join(BAKERY_DIR).join(stem),
+    }
+}
+
+fn source_file_output_name(input: &Path) -> Option<&std::ffi::OsStr> {
+    match input.file_stem().and_then(|stem| stem.to_str()) {
+        Some("app") | Some("main") => input.parent().and_then(|p| p.file_name()),
+        _ => input.file_stem(),
+    }
 }
 
 fn generated_package_name_from_name(name: &str) -> String {
@@ -722,5 +733,5 @@ fn generated_package_name_from_name(name: &str) -> String {
 }
 
 fn is_source_path(path: &str) -> bool {
-    path.ends_with(".flour") || path.ends_with(".crst")
+    path.ends_with(".flour")
 }

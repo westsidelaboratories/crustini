@@ -59,31 +59,38 @@ fn title_from_slug(slug: &str) -> String {
     title
 }
 
-const HELLO_FLOUR: &str = r#"app! {
-  state! {
-    pulse: i16 = 0
-    pulse_dir: i16 = 1
+const HELLO_FLOUR: &str = r#"+++
+crustini = "0.1"
+name = "Hello"
+fps = 30
+window = [180, 120]
++++
+
+app! Main {
+  state {
+    pulse: number = 0;
+    pulse_dir: number = 1;
   }
 
-  update! {
-    pulse = pulse + pulse_dir
+  fn update() {
+    pulse += pulse_dir;
 
     if pulse > 12 {
-      pulse_dir = -1
+      pulse_dir = -1;
     }
 
     if pulse < 0 {
-      pulse_dir = 1
+      pulse_dir = 1;
     }
   }
 
-  draw! {
-    clear!(8)
-    rect!(14, 18, 152, 84, 18)
-    line!(14, 34, 165, 34, 70)
-    text!(48, 48 - pulse, "HELLO", 255)
-    text!(42, 62 + pulse, "WORLD", 210)
-    text!(28, 94, "RX RUNS THIS", 120)
+  fn draw() {
+    clear(Color::Black);
+    rect(14, 18, 152, 84, 18);
+    line(14, 34, 165, 34, 70);
+    text(48, 48 - pulse, "HELLO", Color::White);
+    text(42, 62 + pulse, "WORLD", 210);
+    text(28, 94, "RX RUNS THIS", 120);
   }
 }
 "#;
@@ -104,31 +111,38 @@ build!:
   generated ".crustini/generated"
 "#;
 
-const COUNTER_FLOUR: &str = r#"app! {
-  state! {
-    count: i32 = 0
-    shade: u8 = 120
+const COUNTER_FLOUR: &str = r#"+++
+crustini = "0.1"
+name = "Counter"
+fps = 30
+window = [180, 120]
++++
+
+app! Main {
+  state {
+    count: number = 0;
+    shade: Color = 120;
   }
 
-  update! {
-    if a {
-      count = count + 1
-      shade = 220
+  fn update() {
+    if pressed(Button::A) {
+      count += 1;
+      shade = 220;
     }
 
-    if b {
-      count = count - 1
-      shade = 80
+    if pressed(Button::B) {
+      count -= 1;
+      shade = 80;
     }
   }
 
-  draw! {
-    clear!(0)
-    rect!(8, 8, 164, 104, 24)
-    line!(8, 34, 172, 34, 96)
-    rect!(74, 54, 32, 18, shade)
-    text!(22, 18, "COUNTER", 220)
-    text!(18, 94, "SPACE/Z A  ENTER/X B", 130)
+  fn draw() {
+    clear(Color::Black);
+    rect(8, 8, 164, 104, 24);
+    line(8, 34, 172, 34, 96);
+    rect(74, 54, 32, 18, shade);
+    text(22, 18, "COUNTER", 220);
+    text(18, 94, "SPACE/Z A  ENTER/X B", 130);
   }
 }
 "#;
