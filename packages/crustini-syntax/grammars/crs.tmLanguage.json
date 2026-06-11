@@ -2,21 +2,21 @@
   "scopeName": "source.flour",
   "name": "Crustini",
   "fileTypes": [
-    "flour",
-    "crst"
+    "flour"
   ],
   "patterns": [
     { "include": "#frontMatter" },
-    { "include": "#comments" },
-    { "include": "#strings" },
     { "include": "#compilerForm" },
-    { "include": "#numbers" },
     { "include": "#declarations" },
-    { "include": "#keywords" },
     { "include": "#types" },
-    { "include": "#paths" },
     { "include": "#constants" },
     { "include": "#builtins" },
+    { "include": "source.rust" },
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#paths" },
     { "include": "#properties" },
     { "include": "#operators" },
     { "include": "#punctuation" }

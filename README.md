@@ -39,7 +39,7 @@ app! Main {
 }
 ```
 
-The current compiler is still smaller than that target. It accepts `.flour`, keeps `.crst` as an old compatibility extension, and still supports legacy implementation syntax in existing examples and fixtures. Treat that old surface as implementation compatibility, not the product direction.
+The current compiler is still smaller than that target. It accepts `.flour` and still supports legacy implementation syntax in existing examples and fixtures. Treat that old surface as implementation compatibility, not the product direction.
 
 ## Language Shape
 

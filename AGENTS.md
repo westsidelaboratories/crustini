@@ -20,7 +20,7 @@ Use the current vocabulary consistently.
 
 | Term | Meaning | Current implementation note |
 | --- | --- | --- |
-| `.flour` | Crustini source code file. This is the source language artists write. | The compiler accepts `.flour`; `.crst` remains an old compatibility extension. |
+| `.flour` | Crustini source code file. This is the source language artists write. | The compiler accepts `.flour`. |
 | `rx` | Short command for running, proofing, baking, and emitting Crustini apps. | A bare `.flour` path runs/previews the app; `rx bake` builds an artifact. |
 | `main.flour` | Product-direction default file for a one-file sketch folder. | Current project-shaped starters still use `recipe.flour` plus `src/main.flour`. |
 | `recipe.flour` | Compatibility project config for current project-shaped apps. | Do not silently rename this in docs or code until the CLI supports the new shape. |

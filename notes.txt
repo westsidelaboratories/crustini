@@ -49,7 +49,7 @@ Keep technical precision beside the themed word:
 Current repo names:
 
 - .flour is accepted as the source suffix.
-- .crst examples still work as compatibility fixtures.
+- .flour examples are the only source extension.
 - .bakery/ is the generated build workspace.
 - rx proof is the current source validation command.
 - rx bake is the current bake command.

@@ -13,7 +13,7 @@
       {
         "id": "crustini",
         "aliases": ["Crustini", "crustini"],
-        "extensions": [".flour", ".crst"],
+        "extensions": [".flour"],
         "configuration": "./language-configuration.json"
       }
     ],

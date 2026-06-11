@@ -24,7 +24,7 @@ Use plain technical words for everything else: artifact, diagnostics, logs, gene
 
 A `.flour` file is user-authored app source. It is the small creative coding language described in [`../new-spec.md`](../new-spec.md), lowered into generated Rust by Crustini.
 
-Current compatibility note: `.crst` remains accepted as an old source extension, but repo examples and new docs should use `.flour`.
+`.flour` is the only Crustini source extension.
 
 ## `rx`
 
@@ -124,7 +124,7 @@ my-sketch/
 
 | Concept | Current implementation |
 | --- | --- |
-| Source | `.flour`; `.crst` still works as an old alias |
+| Source | `.flour` |
 | Command | `rx` |
 | Default beginner file | `main.flour` product direction |
 | Compatibility project config | `recipe.flour` |
